@@ -19,8 +19,9 @@ void MainWindow::handleJsonData(const QString &jsonStr) {
         QJsonArray layersArray = obj["layers"].toArray();
         for (const QJsonValue &layerValue : layersArray) {
             QJsonObject layerObj = layerValue.toObject();
-            NeuralLayer layer = NeuralLayer::fromJsonObject(layerObj);
+            NeuralLayer* layer = NeuralLayer::fromJsonObject(layerObj);
             // 后续可对layer进行操作
+            if(layer) delete layer;
         }
     }
 }
