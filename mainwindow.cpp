@@ -6,6 +6,13 @@
 #include <QIcon>
 #include <QPushButton>
 
+void MainWindow::setupIconButton(QPushButton* button, const QString& iconPath, int size) {
+    button->setFixedSize(size, size);
+    button->setIcon(QIcon(iconPath));
+    button->setIconSize(QSize(size, size));
+    button->setStyleSheet("background-color:transparent");
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
