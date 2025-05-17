@@ -21,5 +21,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
 };
 #endif // MAINWINDOW_H
