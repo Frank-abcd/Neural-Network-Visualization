@@ -10,6 +10,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     //connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::generateJson);//使用示例
+    setWindowTitle("CodeWings:Neural-Network-Visualization");
+
+    setupIconButton(ui->user, ":/Icon/user.png");
+    setupIconButton(ui->mode, ":/Icon/mode.png");
+    setupIconButton(ui->generate_code, ":/Icon/code.png");
+    setupIconButton(ui->generate_image, ":/Icon/image.png");
+    setupIconButton(ui->history, ":/Icon/history.png");
+    setupIconButton(ui->start_new, ":/Icon/new.png");
+    setupIconButton(ui->previous, ":/Icon/previous.png");
+    setupIconButton(ui->turnback, ":/Icon/turnback.png");
+    setupIconButton(ui->save, ":/Icon/save.png");
 }
 void MainWindow::handleJsonData(const QString &jsonStr) {
     QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
