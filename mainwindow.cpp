@@ -3,6 +3,8 @@
 #include "json_utils.h"
 #include "backend.h"
 #include <QJsonDocument>
+#include <QIcon>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
