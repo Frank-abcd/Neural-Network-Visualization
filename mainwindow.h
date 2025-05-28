@@ -23,5 +23,13 @@ public:
 private:
     Ui::MainWindow *ui;
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
+
+private slots:
+    void on_user_clicked();
+    void on_mode_clicked();
+    void on_generate_code_clicked();
+    void on_generate_image_clicked();
+
+    void on_toolButton_clicked();
 };
 #endif // MAINWINDOW_H
