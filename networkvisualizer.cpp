@@ -1,6 +1,6 @@
 #include "networkvisualizer.h"
 #include <QRandomGenerator>
-#include "layerblockitem.h"
+//#include "layerblockitem.h"
 
 
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
@@ -23,12 +23,12 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
     // 背景框
     QGraphicsRectItem* bg = new QGraphicsRectItem(0, 0, width, height);
     bg->setBrush(QColor(240, 240, 240));
-    bg->setPen(QPen(Qt::blue));
+    bg->setPen(QPen(Qt::black));
     group->addToGroup(bg);
 
     // 层标签
     QGraphicsTextItem* title = new QGraphicsTextItem(layerName);
-    title->setPos(40, 5);
+    title->setPos(10, 5);
     group->addToGroup(title);
 
     // 图形项
@@ -57,11 +57,11 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
         plus->setPos(width / 2 - 10, 60);
         group->addToGroup(plus);
         QGraphicsTextItem* plusLabel = new QGraphicsTextItem("+", plus);
-        plusLabel->setPos(2, 0);
+        plusLabel->setPos(5, 0);
     }
 
     if (!activation.trimmed().isEmpty()) {
-        act = new QGraphicsRectItem(0, 0, 100, 26);
+        act = new QGraphicsRectItem(0, 0, 100, 30);
         act->setBrush(QColor(180, 220, 255));
         act->setPos(30, 90);
         group->addToGroup(act);

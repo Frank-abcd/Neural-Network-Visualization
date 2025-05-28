@@ -2,7 +2,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "neuronitem.h"
-#include "connectionitem.h"
+//#include "connectionitem.h"
 #include "backend.h"
 #include <QGraphicsScene>
 #include <QGraphicsItemGroup>
