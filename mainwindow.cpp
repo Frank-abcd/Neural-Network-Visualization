@@ -2,9 +2,11 @@
 #include "ui_mainwindow.h"
 #include "json_utils.h"
 #include "backend.h"
-#include <QJsonDocument>
+#include "propertypanel.h"
 #include <QIcon>
 #include <QPushButton>
+
+PropertyPanel* propertyPanel;
 
 void MainWindow::setupIconButton(QPushButton* button, const QString& iconPath, int size) {
     button->setFixedSize(size, size);
@@ -19,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     //connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::generateJson);//使用示例
+
     setWindowTitle("CodeWings:Neural-Network-Visualization");
 
     setupIconButton(ui->user, ":/Icon/user.png");
@@ -31,6 +34,34 @@ MainWindow::MainWindow(QWidget *parent)
     setupIconButton(ui->turnback, ":/Icon/turnback.png");
     setupIconButton(ui->save, ":/Icon/save.png");
 }
+
+void MainWindow::on_user_clicked()
+{
+    qDebug() << "user 按钮点击了";
+    // 在这里实现你希望的功能逻辑
+}
+
+void MainWindow::on_mode_clicked()
+{
+    qDebug() << "mode 按钮点击了";
+
+}
+
+void MainWindow::on_generate_code_clicked()
+{
+    qDebug() << "代码生成中";
+}
+
+void MainWindow::on_generate_image_clicked()
+{
+    qDebug() << "神经网络图像生成中";
+}
+
+void MainWindow::on_toolButton_clicked()
+{
+
+}
+
 void MainWindow::handleJsonData(const QString &jsonStr) {
     QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
     if (doc.isObject()) {
@@ -39,16 +70,17 @@ void MainWindow::handleJsonData(const QString &jsonStr) {
         QJsonArray layersArray = obj["layers"].toArray();
         for (const QJsonValue &layerValue : layersArray) {
             QJsonObject layerObj = layerValue.toObject();
-            NeuralLayer* layer = NeuralLayer::fromJsonObject(layerObj);
+            NeuralLayer layer = NeuralLayer::fromJsonObject(layerObj);
             // 后续可对layer进行操作
-            if(layer) delete layer;
         }
     }
 }
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
 /*void MainWindow::generateJson()//使用示例
 {
     NeuralLayer layer1;
@@ -75,4 +107,3 @@ MainWindow::~MainWindow()
     QString jsonStr = QString::fromUtf8(doc.toJson());
     qDebug() << jsonStr;
 }*/
-
