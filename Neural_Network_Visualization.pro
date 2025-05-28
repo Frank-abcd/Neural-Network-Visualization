@@ -1,8 +1,11 @@
 QT       += core gui
+QT += widgets
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -11,16 +14,26 @@ CONFIG += c++17
 SOURCES += \
     backend.cpp \
     codegenerator.cpp \
+    connectionitem.cpp \
     json_utils.cpp \
+    layerblockitem.cpp \
+    layeritem.cpp \
     main.cpp \
     mainwindow.cpp \
+    networkvisualizer.cpp \
+    neuronitem.cpp \
     programfragmentprocessor.cpp
 
 HEADERS += \
     backend.h \
     codegenerator.h \
+    connectionitem.h \
     json_utils.h \
+    layerblockitem.h \
+    layeritem.h \
     mainwindow.h \
+    networkvisualizer.h \
+    neuronitem.h \
     programfragmentprocessor.h
 
 FORMS += \
