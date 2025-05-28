@@ -1,10 +1,19 @@
 #ifndef LAYERITEM_H
 #define LAYERITEM_H
 
-class layeritem
+#include <QGraphicsItem>
+#include <QString>
+
+class LayerItem : public QGraphicsItem
 {
 public:
-    layeritem();
+    LayerItem(const QString& type, QGraphicsItem* parent = nullptr);
+
+    QRectF boundingRect() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override;
+
+private:
+    QString layerType;
 };
 
-#endif // LAYERITEM_H
+#endif
