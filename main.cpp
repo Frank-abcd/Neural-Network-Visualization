@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     layers.append(l4);
 
     NetworkVisualizer* visualizer = new NetworkVisualizer();
+    visualizer->applyColorTheme("Ocean");
     visualizer->createNetwork(layers);
     visualizer->show();
 
