@@ -1,5 +1,6 @@
 #include "layerblockitem.h"
 #include <QPen>
+#include "colorthememanager.h"
 
 LayerBlockItem::LayerBlockItem(const QString& title, const QString& activation, int neuronCount, QGraphicsItem* parent)
     : QGraphicsItemGroup(parent)
@@ -57,15 +58,8 @@ LayerBlockItem::LayerBlockItem(const QString& title, const QString& activation, 
     addToGroup(plusToActLine);
 
 }
-/*
-void LayerBlockItem::addComponent(const QString& label, const QPointF& pos, const QSizeF& size) {
-    QGraphicsRectItem* box = new QGraphicsRectItem(QRectF(pos, size));
-    box->setBrush(QColor("#E0F7FA"));
-    QGraphicsTextItem* text = new QGraphicsTextItem(label, box);
-    text->setPos(pos.x() + 8, pos.y() + 5);
-    addToGroup(box);
-}
-*/
+
+
 QGraphicsRectItem* LayerBlockItem::addComponent(const QString& label, const QPointF& pos, const QSizeF& size) {
     QGraphicsRectItem* box = new QGraphicsRectItem(QRectF(pos, size));
     box->setBrush(QColor("#E0F7FA"));

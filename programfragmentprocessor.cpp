@@ -97,71 +97,9 @@ QString ProgramFragmentProcessor::extractActivationFunction(const QString& code,
 QJsonObject ProgramFragmentProcessor::validateCode(const QString& code) {
     QJsonObject validationResult;
     validationResult["valid"] = true;
-    QJsonArray errors;
+    validationResult["errors"] = QJsonArray();
 
-    // 1. 基本语法检查
-    if (code.trimmed().isEmpty()) {
-        errors.append("代码不能为空");
-        validationResult["valid"] = false;
-        validationResult["errors"] = errors;
-        return validationResult;
-    }
+    // 检查常见语法错误,未实现
 
-    // 2. 检查Python缩进错误 (简单检查：每行缩进必须是4的倍数)
-    QStringList lines = code.split('\n');
-    QRegularExpression indentRegex("^(\\s*)");
-
-    for (int i = 0; i < lines.size(); i++) {
-        QString line = lines[i].trimmed();
-        if (line.isEmpty() || line.startsWith("#")) continue; // 跳过空行和注释
-
-        // 获取当前行的缩进空格数
-        QRegularExpressionMatch match = indentRegex.match(lines[i]);
-        int indent = match.captured(1).length();
-
-        // 检查缩进是否是4的倍数
-        if (indent % 4 != 0) {
-            errors.append(QString("第 %1 行：缩进必须是4个空格的倍数").arg(i + 1));
-            validationResult["valid"] = false;
-        }
-
-        // 简单的缩进层次检查
-        if (line.endsWith(":")) {
-            // 冒号行后应该增加缩进
-            if (i + 1 < lines.size()) {
-                QRegularExpressionMatch nextMatch = indentRegex.match(lines[i + 1]);
-                int nextIndent = nextMatch.captured(1).length();
-                if (nextIndent <= indent) {
-                    errors.append(QString("第 %1 行：冒号后需要增加缩进").arg(i + 1));
-                    validationResult["valid"] = false;
-                }
-            }
-        }
-    }
-
-    // 3. 检查常见的PyTorch相关错误
-    if (code.contains("nn.") || code.contains("torch.")) {
-        // 检查常见的PyTorch模块引用错误
-        if (!code.contains("import torch") && !code.contains("import torch.nn")) {
-            errors.append("使用PyTorch模块但未导入torch或torch.nn");
-            validationResult["valid"] = false;
-        }
-
-        // 检查常见的层定义错误
-        QRegularExpression layerRegex("self\\.(conv|fc|pool|lstm|gru|rnn)\\d+\\s*=\\s*nn\\.");
-        QRegularExpressionMatchIterator it = layerRegex.globalMatch(code);
-        while (it.hasNext()) {
-            QRegularExpressionMatch match = it.next();
-            QString layerDef = match.captured(0);
-
-            // 检查是否缺少括号
-            if (!layerDef.contains("(") || !layerDef.contains(")")) {
-                errors.append("层定义语法错误：缺少括号");
-                validationResult["valid"] = false;
-            }
-        }
-    }
-
-    validationResult["errors"] = errors;
     return validationResult;
 }

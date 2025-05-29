@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Icon/wing.png</file>
+        <file>Icon/user.png</file>
+        <file>Icon/code.png</file>
+        <file>Icon/image.png</file>
+        <file>Icon/mode.png</file>
+        <file>Icon/history.png</file>
+        <file>Icon/new.png</file>
+        <file>Icon/save.png</file>
+        <file>Icon/turnback.png</file>
+        <file>Icon/previous.png</file>
+    </qresource>
+</RCC>
