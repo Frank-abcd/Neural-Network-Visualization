@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QJsonArray>
+#include <QGraphicsScene>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,16 +21,28 @@ public:
     ~MainWindow();
     void handleJsonData(const QString &jsonStr);
     //void generateJson();//使用示例
+    QString currentMode = "unselected";
+    void showFloatingMessage(const QString& text);
+    QJsonArray getCurrentNetworkAsJson();
+    void showSaveProgressBarMessage();
+    void loadNetworkFromJson(const QJsonArray& layers);
+    void showWarningMessage(const QString& text);
 
 private:
     Ui::MainWindow *ui;
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
+    QGraphicsScene* scene;
 
 private slots:
     void on_user_clicked();
     void on_mode_clicked();
     void on_generate_code_clicked();
     void on_generate_image_clicked();
+    void on_history_clicked();
+    void on_start_new_clicked();
+    void on_previous_clicked();
+    void on_turnback_clicked();
+    void on_save_clicked();
 
     void on_toolButton_clicked();
 };
