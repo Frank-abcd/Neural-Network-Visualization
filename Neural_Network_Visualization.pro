@@ -14,6 +14,7 @@ CONFIG += c++17
 SOURCES += \
     backend.cpp \
     codegenerator.cpp \
+    colorthememanager.cpp \
     connectionitem.cpp \
     json_utils.cpp \
     layerblockitem.cpp \
@@ -22,11 +23,12 @@ SOURCES += \
     mainwindow.cpp \
     networkvisualizer.cpp \
     neuronitem.cpp \
-    programfragmentprocessor.cpp
+    programfragmentprocessor.cpp 
 
 HEADERS += \
     backend.h \
     codegenerator.h \
+    colorthememanager.h \
     connectionitem.h \
     json_utils.h \
     layerblockitem.h \
@@ -34,7 +36,7 @@ HEADERS += \
     mainwindow.h \
     networkvisualizer.h \
     neuronitem.h \
-    programfragmentprocessor.h
+    programfragmentprocessor.h 
 
 FORMS += \
     mainwindow.ui
