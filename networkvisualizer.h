@@ -2,7 +2,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "neuronitem.h"
-//#include "connectionitem.h"
+#include "connectionitem.h"
 #include "backend.h"
 #include <QGraphicsScene>
 #include <QGraphicsItemGroup>
@@ -29,7 +29,15 @@ public:
     void createblockNetwork(const QList<NeuralLayer>& layers);
     QGraphicsItemGroup* createDetailedLayer(const QString& layerName, const QString& activation, int yPos);
 
+protected:
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 private:
     QGraphicsScene* m_scene;
+    QList<NeuralLayer> m_layers;
+    QGraphicsItem* m_dragItem = nullptr;
+    QPointF m_dragStartPos;
 };

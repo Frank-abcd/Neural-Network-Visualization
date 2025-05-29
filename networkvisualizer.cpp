@@ -1,12 +1,22 @@
 #include "networkvisualizer.h"
 #include <QRandomGenerator>
-//#include "layerblockitem.h"
+#include <QGraphicsRectItem>
+#include <QMimeData>
+#include <QDrag>
+#include <QApplication>
+#include <QMouseEvent>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QGraphicsRectItem>
+#include "layerblockitem.h"
 
 
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
     : QGraphicsView(parent), m_scene(new QGraphicsScene(this)) {
     setScene(m_scene);
     setRenderHint(QPainter::Antialiasing);
+    setDragMode(QGraphicsView::RubberBandDrag);
+    setAcceptDrops(true); // 启用拖拽功能
 }
 
 QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
@@ -23,12 +33,12 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
     // 背景框
     QGraphicsRectItem* bg = new QGraphicsRectItem(0, 0, width, height);
     bg->setBrush(QColor(240, 240, 240));
-    bg->setPen(QPen(Qt::black));
+    bg->setPen(QPen(Qt::blue));
     group->addToGroup(bg);
 
     // 层标签
     QGraphicsTextItem* title = new QGraphicsTextItem(layerName);
-    title->setPos(10, 5);
+    title->setPos(40, 5);
     group->addToGroup(title);
 
     // 图形项
@@ -57,11 +67,11 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
         plus->setPos(width / 2 - 10, 60);
         group->addToGroup(plus);
         QGraphicsTextItem* plusLabel = new QGraphicsTextItem("+", plus);
-        plusLabel->setPos(5, 0);
+        plusLabel->setPos(2, 0);
     }
 
     if (!activation.trimmed().isEmpty()) {
-        act = new QGraphicsRectItem(0, 0, 100, 30);
+        act = new QGraphicsRectItem(0, 0, 100, 26);
         act->setBrush(QColor(180, 220, 255));
         act->setPos(30, 90);
         group->addToGroup(act);
@@ -228,4 +238,58 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
                      QPen(Qt::black));*/
 }
 
+void NetworkVisualizer::mouseMoveEvent(QMouseEvent* event) {
+    if (m_dragItem) {
+        QPointF pos = event->pos();
+        QPointF delta = pos - m_dragStartPos;
+        m_dragItem->setPos(m_dragItem->pos() + delta);
+        m_dragStartPos = pos;
+    }
+    QGraphicsView::mouseMoveEvent(event);
+}
 
+void NetworkVisualizer::mousePressEvent(QMouseEvent* event) {
+    QGraphicsItem* item = itemAt(event->pos());
+    if (item) {
+        m_dragItem = item;
+        m_dragStartPos = event->pos();
+        QMimeData* mimeData = new QMimeData();
+        mimeData->setData("application/x-layer", item->data(0).toByteArray());
+        QDrag* drag = new QDrag(this);
+        drag->setMimeData(mimeData);
+        drag->exec();
+    }
+    QGraphicsView::mousePressEvent(event);
+}
+
+void NetworkVisualizer::dragMoveEvent(QDragMoveEvent* event) {
+    if (event->mimeData()->hasFormat("application/x-layer")) {
+        event->acceptProposedAction();
+    }
+}
+
+void NetworkVisualizer::dropEvent(QDropEvent* event) {
+    if (event->mimeData()->hasFormat("application/x-layer")) {
+        QByteArray data = event->mimeData()->data("application/x-layer");
+        NeuralLayer layer = qvariant_cast<NeuralLayer>(QVariant::fromValue(data));
+
+        // 根据层类型设置不同颜色和形状
+        QColor color;
+        if (layer.layerType == "Input") color = Qt::cyan;
+        else if (layer.layerType == "Hidden") color = Qt::yellow;
+        else if (layer.layerType == "Output") color = Qt::magenta;
+        else if (layer.layerType == "Convolutional") color = Qt::green;
+        else if (layer.layerType == "Pooling") color = Qt::blue;
+        else if (layer.layerType == "LSTM") color = Qt::red;
+        else if (layer.layerType == "RNN") color = Qt::darkCyan;
+        else if (layer.layerType == "Dropout") color = Qt::gray;
+
+        // 创建层的图形项并添加到场景
+        QGraphicsRectItem* layerItem = new QGraphicsRectItem(QRectF(0, 0, 100, 50), nullptr);
+        layerItem->setPos(event->pos());
+        layerItem->setBrush(color);
+        layerItem->setData(0, QVariant::fromValue(layer));
+        m_scene->addItem(layerItem);
+        m_layers.append(layer);
+    }
+}
