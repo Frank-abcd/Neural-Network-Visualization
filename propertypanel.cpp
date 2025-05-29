@@ -37,3 +37,12 @@ void PropertyPanel::onUpdateButtonClicked()
     }
     emit parametersUpdated(newParams);
 }
+
+void PropertyPanel::clearParameters() {
+    // 清空旧参数输入框
+    for (auto& widget : fieldMap) {
+        layout->removeWidget(widget);
+        delete widget; // 删除旧的输入框，避免内存泄漏
+    }
+    fieldMap.clear();
+}

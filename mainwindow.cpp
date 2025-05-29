@@ -5,6 +5,7 @@
 #include "propertypanel.h"
 #include <QIcon>
 #include <QPushButton>
+#include <QJsonDocument>
 #include <QLabel>
 #include <QTimer>
 #include <QGraphicsOpacityEffect>
@@ -17,10 +18,11 @@
 #include <QDialog>
 #include <QListWidget>
 
+
 PropertyPanel* propertyPanel;
 
 void MainWindow::setupIconButton(QPushButton* button, const QString& iconPath, int size) {
-    button->setFixedSize(size, size);
+    button->setFixedSize(3*size, size);
     button->setIcon(QIcon(iconPath));
     button->setIconSize(QSize(size, size));
     button->setStyleSheet("background-color:transparent");
@@ -31,7 +33,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::generateJson);//使用示例
 
     setWindowTitle("CodeWings:Neural-Network-Visualization");
 
@@ -45,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
     setupIconButton(ui->turnback, ":/Icon/turnback.png");
     setupIconButton(ui->save, ":/Icon/save.png");
 
+    codegeneratorwindow = new CodeGeneratorWindow(this);
+    connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
     QMenu* modeMenu = new QMenu(this);
 
     QAction* blockGenerateAction = new QAction("BlockGenerate 模式", this);
@@ -58,11 +61,13 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     scene = new QGraphicsScene(this);
+
 }
 
 void MainWindow::on_user_clicked()
 {
     qDebug() << "user 按钮点击了";
+    // 在这里实现你希望的功能逻辑
 }
 
 void MainWindow::on_mode_clicked()
@@ -73,7 +78,10 @@ void MainWindow::on_mode_clicked()
 
 void MainWindow::on_generate_code_clicked()
 {
-    qDebug() << "代码生成中";
+    // 显示代码生成窗口
+    codegeneratorwindow->show();
+    // 隐藏当前主窗口
+    this->hide();
 }
 
 void MainWindow::on_generate_image_clicked()
@@ -89,6 +97,7 @@ void MainWindow::on_generate_image_clicked()
     }
     qDebug() << "神经网络图像生成中";
 }
+
 
 void MainWindow::on_history_clicked()
 {
@@ -109,7 +118,6 @@ void MainWindow::on_history_clicked()
             }
         }
     }
-
     layout->addWidget(list);
 
     // 加载按钮
@@ -419,30 +427,3 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-/*void MainWindow::generateJson()//使用示例
-{
-    NeuralLayer layer1;
-    layer1.layerType = "Input";
-    layer1.neurons = 10;
-    layer1.activationFunction = "None";
-
-    NeuralLayer layer2;
-    layer2.layerType = "Hidden";
-    layer2.neurons = 20;
-    layer2.activationFunction = "ReLU";
-
-    NeuralLayer layer3;
-    layer2.layerType = "Output";
-    layer2.neurons = 5;
-    layer2.activationFunction = "ReLU";
-
-    QJsonArray layersArray;
-    layersArray.append(layer1.toJsonObject());
-    layersArray.append(layer2.toJsonObject());
-    layersArray.append(layer3.toJsonObject());
-
-    QJsonDocument doc(layersArray);
-    QString jsonStr = QString::fromUtf8(doc.toJson());
-    qDebug() << jsonStr;
-}*/

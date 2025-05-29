@@ -1,7 +1,6 @@
 #ifndef COLORGROUP_H
 #define COLORGROUP_H
 
-
 #include <QColor>
 #include <QMap>
 #include <QString>

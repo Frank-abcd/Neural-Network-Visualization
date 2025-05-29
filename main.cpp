@@ -19,10 +19,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    /*
-    MainWindow w;
-    w.show();
-    return a.exec();*/
     // 构造一些测试数据
     QList<NeuralLayer> layers;
     NeuralLayer l1; l1.layerType = "input"; l1.inputSize = 18; l1.neurons = 18; l1.activationFunction = " ";
@@ -37,7 +33,13 @@ int main(int argc, char *argv[])
     NetworkVisualizer* visualizer = new NetworkVisualizer();
     visualizer->createNetwork(layers);
     visualizer->show();
-/*
+
+
+    MainWindow w;
+    w.show();
+    return a.exec();
+
+    /*
     visualizer->createblockNetwork(layers);
     visualizer->show();*/
 

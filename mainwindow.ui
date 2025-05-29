@@ -1,4 +1,3 @@
-/*
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
@@ -7,116 +6,111 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
-  </property>
-  <widget class="QWidget" name="centralwidget"/>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
- </widget>
- <resources/>
- <connections/>
-</ui>
-*/
-<?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>691</width>
-    <height>513</height>
+    <width>1275</width>
+    <height>681</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>58</width>
-      <height>491</height>
+      <width>161</width>
+      <height>611</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="user">
+       <property name="minimumSize">
+        <size>
+         <width>119</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <property name="text">
-        <string/>
+        <string>user</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="mode">
+       <property name="minimumSize">
+        <size>
+         <width>119</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string/>
+        <string>mode</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="generate_code">
+       <property name="minimumSize">
+        <size>
+         <width>119</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;切换界面&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 6pt &quot;Microsoft YaHei UI&quot;;</string>
+       </property>
        <property name="text">
-        <string/>
+        <string>generatorcode</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="generate_image">
        <property name="text">
-        <string/>
+        <string>generate_image</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="history">
        <property name="text">
-        <string/>
+        <string>history</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="start_new">
        <property name="text">
-        <string/>
+        <string>start_new</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="previous">
        <property name="text">
-        <string/>
+        <string>previous</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="turnback">
        <property name="text">
-        <string/>
+        <string>turnback</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="save">
        <property name="text">
-        <string/>
+        <string>save</string>
        </property>
       </widget>
      </item>
@@ -128,8 +122,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>691</width>
-     <height>18</height>
+     <width>1275</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>
