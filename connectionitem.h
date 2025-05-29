@@ -1,13 +1,12 @@
 #pragma once
 #include <QGraphicsLineItem>
-#include "colorgroup.h"
-
 
 class ConnectionItem : public QGraphicsLineItem {
 public:
     ConnectionItem(const QPointF& from, const QPointF& to, double weight);
-    void setColor(const QColor& color);
+    void updateColor();  // 根据当前主题更新颜色
+    double weight() const { return m_weight; }
 
 private:
-    QColor m_color;
+    double m_weight;
 };
