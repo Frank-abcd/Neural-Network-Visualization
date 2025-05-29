@@ -27,6 +27,7 @@ public:
     void createNetwork(const QList<NeuralLayer>& layers);
     void setLayers(const QList<NeuralLayer>& layers);
     void createblockNetwork(const QList<NeuralLayer>& layers);
+    void applyColorTheme(const QString& themeName);
     QGraphicsItemGroup* createDetailedLayer(const QString& layerName, const QString& activation, int yPos);
 
 protected:
@@ -40,4 +41,6 @@ private:
     QList<NeuralLayer> m_layers;
     QGraphicsItem* m_dragItem = nullptr;
     QPointF m_dragStartPos;
+     QVector<QVector<NeuronItem*>> m_allNeurons; // 存储神经元指针以便更新
+    QList<QGraphicsItemGroup*> m_layerGroups;
 };
