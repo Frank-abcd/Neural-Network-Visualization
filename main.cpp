@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 
 
     MainWindow w;
+    MainWindow::setInstance(&w);
     w.show();
     return a.exec();
 
