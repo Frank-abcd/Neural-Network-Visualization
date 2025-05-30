@@ -9,6 +9,8 @@
 #include <QDropEvent>
 #include <QGraphicsRectItem>
 #include "layerblockitem.h"
+#include "colorthememanager.h"
+
 
 
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
