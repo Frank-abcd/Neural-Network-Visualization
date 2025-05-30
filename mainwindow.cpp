@@ -427,3 +427,14 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+// 静态成员定义
+MainWindow* MainWindow::s_instance = nullptr;
+
+MainWindow* MainWindow::instance() {
+    return s_instance;
+}
+
+void MainWindow::setInstance(MainWindow* window) {
+    s_instance = window;
+}
+
