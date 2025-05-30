@@ -22,10 +22,13 @@ public:
     ~MainWindow();
     void handleJsonData(const QString &jsonStr);
     //void generateJson();//使用示例
+    /*
     static MainWindow* instance() {
         static MainWindow* instance = new MainWindow();
         return instance;
-    }
+    }*/
+    static MainWindow* instance();
+    static void setInstance(MainWindow* window);//
     QString currentMode = "unselected";
     void showFloatingMessage(const QString& text);
     QJsonArray getCurrentNetworkAsJson();
@@ -36,6 +39,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    static MainWindow* s_instance;  // 添加这行
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
     CodeGeneratorWindow* codegeneratorwindow;
     QGraphicsScene* scene;
