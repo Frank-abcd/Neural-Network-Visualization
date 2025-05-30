@@ -18,5 +18,3 @@ void ConnectionItem::updateColor() {
     setPen(pen);
 }
 
-
-}
