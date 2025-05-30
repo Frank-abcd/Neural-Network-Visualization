@@ -14,6 +14,7 @@ CONFIG += c++17
 SOURCES += \
     backend.cpp \
     codegenerator.cpp \
+    codegeneratorwindow.cpp \
     colorthememanager.cpp \
     connectionitem.cpp \
     json_utils.cpp \
@@ -29,6 +30,8 @@ SOURCES += \
 HEADERS += \
     backend.h \
     codegenerator.h \
+    codegeneratorwindow.h \
+    colorthememanager.h \
     colorthememanager.h \
     connectionitem.h \
     json_utils.h \
@@ -38,22 +41,20 @@ HEADERS += \
     networkvisualizer.h \
     neuronitem.h \
     programfragmentprocessor.h \
-    propertypanel.h
+    propertypanel.h \
+    #ui_codegeneratorwindow.ui
 
 FORMS += \
-    mainwindow.ui
-/*
-TRANSLATIONS += \
-    CodeWings_zh_CN.ts
+    mainwindow.ui \
+    codegeneratorwindow.ui
+
 CONFIG += lrelease
 CONFIG += embed_translations
-*/
+
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-/*
-RESOURCES += \
-    resource.qrc
+
 
 DISTFILES +=*/
