@@ -105,6 +105,12 @@ void MainWindow::on_generate_image_clicked()
     }
 
     QJsonArray structure = codeWin->getNetworkAsJson();
+    QList<NeuralLayer> layers;
+    for (const QJsonValue& val : structure) {
+        if (val.isObject()) {
+            layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+        }
+    }
 
     if (structure.isEmpty()) {
         showWarningMessage("网络结构为空，无法生成图像！");
@@ -112,7 +118,11 @@ void MainWindow::on_generate_image_clicked()
     }
 
     // 调用你已有的神经网络图像生成逻辑（比如显示在主界面某个区域）
-    visualizeNetwork(structure);  // 你来实现这个函数，基于 structure 展示图像
+    NetworkVisualizer* visualizer = new NetworkVisualizer();
+    visualizer->applyColorTheme("Ocean");
+    visualizer->createNetwork(layers);
+    visualizer->show();// 你来实现这个函数，基于 structure 展示图像
+    ui->scrollAreavisualizer->setWidget(visualizer);
 }
 
 void MainWindow::on_history_clicked()
