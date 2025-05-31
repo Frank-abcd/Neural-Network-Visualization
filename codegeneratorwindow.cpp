@@ -809,10 +809,13 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             updateLayerConnections(layerItem);
         });
 
+       
         params["LayerType"] = layerType;
         if(layerType =="Dense"){
             params["neurons"] = "10";
             params["activation"] = "ReLU";
+            layer.neurons = 10;
+            layer.activationFunction = "ReLU";
         }
         else if (layerType == "Convolutional") {
             params["filters"] = "32";
@@ -827,6 +830,21 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         else if (layerType == "Dropout") {
             params["dropout_rate"] = "0.5";
         }
+        else if (layerType == "Input") {
+            params["neurons"] = "10";
+            layer.neurons = 10;
+        }
+        else if (layerType == "Output") {
+           params["neurons"] = "2";
+            layer.neurons = 2;
+        }
+        else if (layerType == "Hidden") {
+            params["neurons"] = "10";
+            params["activation"] = "ReLU";
+            layer.neurons = 10;
+            layer.activationFunction = "ReLU";
+        }
+        m_layers.append(layer);
 
         m_propertyPanel->clearParameters();
 
