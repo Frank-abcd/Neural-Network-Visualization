@@ -21,12 +21,12 @@ class ColorThemeManager {
 public:
     static const QMap<QString, ColorTheme>& themes();
     static ColorTheme currentTheme();
+    static QString getCurrentTheme();
     static void setCurrentTheme(const QString& themeName);
 
 private:
     static QString s_currentTheme;
     static const QMap<QString, ColorTheme> s_themes;
-};
 
 #endif // COLORTHEMEMANAGER_H
 
