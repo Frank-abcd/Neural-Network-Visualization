@@ -113,22 +113,23 @@ MainWindow::MainWindow(QWidget *parent)
     colorMenu->addAction(ocean);
     ui->color->setMenu(colorMenu);
 
-    connect(classic, &QAction::triggered, this, [=]() {
+        connect(classic, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Classic");
-        showFloatingMessage("Classic");
+        showFloatingMessage("设置Classic 按generate——image更新");
     });
     connect(vibrant, &QAction::triggered, this, [=]() {
          ColorThemeManager::setCurrentTheme("Vibrant");
-        showFloatingMessage("Vibrant");
+        showFloatingMessage("设置Vibrant 按generate——image更新");
     });
     connect(dark, &QAction::triggered, this, [=]() {
          ColorThemeManager::setCurrentTheme("Dark");
-        showFloatingMessage("Dark ");
+        showFloatingMessage("设置Dark 按generate——image更新 ");
     });
     connect(ocean, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Ocean");
-        showFloatingMessage("Ocean");
+        showFloatingMessage("设置cean 按generate——image更新");
     });
+
 
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
