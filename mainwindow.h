@@ -5,8 +5,8 @@
 #include <QPushButton>
 #include <QJsonArray>
 #include <QGraphicsScene>
-#include  "codegeneratorwindow.h"
-#include <networkvisualizer.h>
+#include "codegeneratorwindow.h"
+#include "networkvisualizer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
