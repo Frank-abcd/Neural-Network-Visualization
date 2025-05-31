@@ -35,7 +35,7 @@ public:
     void showSaveProgressBarMessage();
     void loadNetworkFromJson(const QJsonArray& layers);
     void showWarningMessage(const QString& text);
-
+    void visualizeNetwork(const QJsonArray& layers);
 
 private:
     Ui::MainWindow *ui;
@@ -43,7 +43,8 @@ private:
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
     CodeGeneratorWindow* codegeneratorwindow;
     QGraphicsScene* scene;
-
+    QJsonArray m_cachedNetworkJson;
+    CodeGeneratorWindow* codeWin = nullptr;
 
 private slots:
     void on_user_clicked();

@@ -46,6 +46,16 @@ MainWindow::MainWindow(QWidget *parent)
     setupIconButton(ui->turnback, ":/Icon/turnback.png");
     setupIconButton(ui->save, ":/Icon/save.png");
 
+    ui->user->setToolTip("CodeWings用户使用介绍");
+    ui->mode->setToolTip("切换显示模式");
+    ui->generate_code->setToolTip("生成 PyTorch 或 TensorFlow 代码");
+    ui->generate_image->setToolTip("生成网络结构图像");
+    ui->history->setToolTip("查看已保存的历史");
+    ui->start_new->setToolTip("开始新的神经网络");
+    ui->previous->setToolTip("返回上一步");
+    ui->turnback->setToolTip("前进到下一步");
+    ui->save->setToolTip("保存当前神经网络结构");
+
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
     QMenu* modeMenu = new QMenu(this);
@@ -78,50 +88,31 @@ void MainWindow::on_mode_clicked()
 
 void MainWindow::on_generate_code_clicked()
 {
-    // 显示代码生成窗口
-    codegeneratorwindow->show();
-    // 隐藏当前主窗口
-    this->hide();
+    if (!codeWin) {
+        codeWin = new CodeGeneratorWindow(this);
+    }
+
+    this->hide();              // 隐藏主界面
+    codeWin->show();           // 显示弹窗
 }
 
 void MainWindow::on_generate_image_clicked()
 {
-    if (currentMode=="unselected"){
-        showFloatingMessage("Please select a mode.");
+    if (!codeWin) {
+        showWarningMessage("尚未创建网络结构！");
+        return;
     }
-    if (currentMode=="blockgenerate"){
-        // 创建可视化组件
-        NetworkVisualizer* visualizer = new NetworkVisualizer(this);
-        visualizer->applyColorTheme("Ocean");
 
-        // 获取网络结构并解析
-        QJsonArray json = codegeneratorwindow->getNetworkAsJson();
-        QList<NeuralLayer> layers;
-        for (const QJsonValue& val : json) {
-            if (val.isObject()) {
-                layers.append(NeuralLayer::fromJsonObject(val.toObject()));
-            }
-        }
-        /*QJsonArray networkJson = getCurrentNetworkAsJson();
-        QList<NeuralLayer> layers;
-        for (const QJsonValue& value : networkJson) {
-            if (value.isObject()) {
-                layers.append(NeuralLayer::fromJsonObject(value.toObject()))
-;
-            }
-        }*/
-        // 可视化神经网络
-        visualizer->createNetwork(layers);
+    QJsonArray structure = codeWin->getNetworkAsJson();
 
-        ui->scrollAreavisualizer->setWidget(visualizer);
-
+    if (structure.isEmpty()) {
+        showWarningMessage("网络结构为空，无法生成图像！");
+        return;
     }
-    if (currentMode==""){
 
-    }
-    qDebug() << "神经网络图像生成中";
+    // 调用你已有的神经网络图像生成逻辑（比如显示在主界面某个区域）
+    visualizeNetwork(structure);  // 你来实现这个函数，基于 structure 展示图像
 }
-
 
 void MainWindow::on_history_clicked()
 {
@@ -445,6 +436,35 @@ void MainWindow::showWarningMessage(const QString& text)
     });
 
     connect(fadeOut, &QPropertyAnimation::finished, label, &QLabel::deleteLater);
+}
+
+void MainWindow::visualizeNetwork(const QJsonArray& layers)
+{
+    QGraphicsScene* scene = new QGraphicsScene(this);
+    QGraphicsView* view = new QGraphicsView(scene);
+    view->setMinimumHeight(300);
+
+    for (const QJsonValue& val : layers) {
+        QJsonObject obj = val.toObject();
+        QString type = obj["layerType"].toString();
+        int x = obj["x"].toInt();
+        int y = obj["y"].toInt();
+
+        QGraphicsRectItem* item = new QGraphicsRectItem(0, 0, 100, 50);
+        item->setPos(x, y);
+        item->setBrush(Qt::lightGray);
+        item->setToolTip(type);
+        scene->addItem(item);
+    }
+
+    // 假设你有一个 QWidget 区域叫 ui->previewArea
+    QLayout* layout = ui->scrollAreaWidgetContents_2->layout();
+    if (!layout) {
+        layout = new QVBoxLayout(ui->scrollAreaWidgetContents_2);
+        ui->scrollAreaWidgetContents_2->setLayout(layout);
+    }
+
+    layout->addWidget(view);
 }
 
 MainWindow::~MainWindow()
