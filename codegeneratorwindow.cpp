@@ -66,10 +66,12 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     QPushButton* deleteLayerButton = new QPushButton("Delete Selected Layer", this);
     connect(deleteLayerButton, &QPushButton::clicked, this, &CodeGeneratorWindow::deleteSelectedLayer);
     mainLayout->addWidget(deleteLayerButton);
-    //回到主菜单
+//回到主菜单
     QPushButton* returnButton = new QPushButton("返回主界面", this);
     connect(returnButton, &QPushButton::clicked, this, &CodeGeneratorWindow::on_return_mainwindow_clicked);
     mainLayout->addWidget(returnButton);  // 添加在两个按钮后
+
+
 }
 
 CodeGeneratorWindow::~CodeGeneratorWindow()
@@ -224,5 +226,12 @@ void CodeGeneratorWindow::on_return_mainwindow_clicked()
 {
     this->close();
     MainWindow::instance()->show();
+}
+QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
+    QJsonArray array;
+    for (const NeuralLayer& layer : m_layers) {
+        array.append(layer.toJsonObject());
+    }
+    return array;
 }
 

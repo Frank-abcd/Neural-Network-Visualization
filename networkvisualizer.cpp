@@ -11,8 +11,6 @@
 #include "layerblockitem.h"
 #include "colorthememanager.h"
 
-
-
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
     : QGraphicsView(parent), m_scene(new QGraphicsScene(this)) {
     setScene(m_scene);
@@ -177,6 +175,60 @@ void NetworkVisualizer::createNetwork(const QList<NeuralLayer>& layers) {
         }
     }
 }
+/*
+void NetworkVisualizer::createNetwork(const QJsonArray& layersJson) {
+    m_scene->clear();
+    m_allNeurons.clear();
+    QVector<QVector<NeuronItem*>> allNeurons;
+
+    const int xSpacing = 200;
+    const int ySpacing = 60;
+
+        for (int i = 0; i < layersJson.size(); ++i) {
+            QJsonObject layerObj = layersJson[i].toObject();
+            QString layerType = layerObj.value("layerType").toString();
+            QString activationFunction = layerObj.value("activationFunction").toString();
+            int neuronCount = layerObj.value("neurons").toInt();
+
+            QVector<NeuronItem*> layerNeurons;
+            int yOffset = -(neuronCount - 1) * ySpacing / 2;
+
+        // 🔹 层前缀标识
+        QString prefix;
+        if (i == 0) prefix = "I";
+        else if (i == layersJson.size() - 1) prefix = "O";
+        else prefix = "H";
+
+        // 🔹 添加层标签文本
+        QString label = QString("%1\n(%2)").arg(layerType).arg(activationFunction);
+        QGraphicsTextItem* layerLabel = m_scene->addText(label);
+        layerLabel->setDefaultTextColor(Qt::darkBlue);
+        layerLabel->setPos(i * xSpacing - 30, yOffset - 60);
+
+        // 🔹 添加神经元
+        for (int j = 0; j <  neuronCount; ++j) {
+            NeuronItem* neuron = new NeuronItem(QString("%1%2").arg(prefix).arg(j + 1));
+            neuron->updateColors();
+            m_scene->addItem(neuron);
+            neuron->setPos(i * xSpacing, yOffset + j * ySpacing);
+            layerNeurons.append(neuron);
+        }
+
+        allNeurons.append(layerNeurons);// 改为存储到成员变量
+        m_allNeurons = allNeurons;
+    }
+
+    // 🔹 添加连接线
+    for (int i = 0; i < allNeurons.size() - 1; ++i) {
+        for (NeuronItem* from : allNeurons[i]) {
+            for (NeuronItem* to : allNeurons[i + 1]) {
+                double weight = QRandomGenerator::global()->bounded(1.0);
+                ConnectionItem* conn = new ConnectionItem(from->pos(), to->pos(), weight);
+                m_scene->addItem(conn);
+            }
+        }
+    }
+}*/
 void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
     m_scene->clear();
     m_layerGroups.clear();

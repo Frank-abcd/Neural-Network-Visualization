@@ -90,6 +90,30 @@ void MainWindow::on_generate_image_clicked()
         showFloatingMessage("Please select a mode.");
     }
     if (currentMode=="blockgenerate"){
+        // 创建可视化组件
+        NetworkVisualizer* visualizer = new NetworkVisualizer(this);
+        visualizer->applyColorTheme("Ocean");
+
+        // 获取网络结构并解析
+        QJsonArray json = codegeneratorwindow->getNetworkAsJson();
+        QList<NeuralLayer> layers;
+        for (const QJsonValue& val : json) {
+            if (val.isObject()) {
+                layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+            }
+        }
+        /*QJsonArray networkJson = getCurrentNetworkAsJson();
+        QList<NeuralLayer> layers;
+        for (const QJsonValue& value : networkJson) {
+            if (value.isObject()) {
+                layers.append(NeuralLayer::fromJsonObject(value.toObject()))
+;
+            }
+        }*/
+        // 可视化神经网络
+        visualizer->createNetwork(layers);
+
+        ui->scrollAreavisualizer->setWidget(visualizer);
 
     }
     if (currentMode==""){
@@ -437,4 +461,3 @@ MainWindow* MainWindow::instance() {
 void MainWindow::setInstance(MainWindow* window) {
     s_instance = window;
 }
-

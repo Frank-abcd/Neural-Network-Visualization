@@ -20,6 +20,7 @@ class CodeGeneratorWindow : public QDialog
 
 public:
     explicit CodeGeneratorWindow(QWidget *parent = nullptr);
+    QJsonArray getNetworkAsJson() const;
     ~CodeGeneratorWindow();
 
 private slots:

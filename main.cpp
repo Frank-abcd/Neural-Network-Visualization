@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
+    /*
     // 构造一些测试数据
     QList<NeuralLayer> layers;
     NeuralLayer l1; l1.layerType = "input"; l1.inputSize = 18; l1.neurons = 18; l1.activationFunction = " ";
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     visualizer->createNetwork(layers);
     visualizer->show();
 
+*/
 
     MainWindow w;
     MainWindow::setInstance(&w);

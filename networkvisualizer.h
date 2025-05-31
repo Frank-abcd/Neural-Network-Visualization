@@ -25,6 +25,7 @@ class NetworkVisualizer : public QGraphicsView {
 public:
     NetworkVisualizer(QWidget* parent = nullptr);
     void createNetwork(const QList<NeuralLayer>& layers);
+    void createNetwork(const QJsonArray& layersJson);
     void setLayers(const QList<NeuralLayer>& layers);
     void createblockNetwork(const QList<NeuralLayer>& layers);
     void applyColorTheme(const QString& themeName);

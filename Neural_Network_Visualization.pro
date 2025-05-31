@@ -32,7 +32,6 @@ HEADERS += \
     codegenerator.h \
     codegeneratorwindow.h \
     colorthememanager.h \
-    colorthememanager.h \
     connectionitem.h \
     json_utils.h \
     layerblockitem.h \
@@ -41,20 +40,23 @@ HEADERS += \
     networkvisualizer.h \
     neuronitem.h \
     programfragmentprocessor.h \
-    propertypanel.h \
-    #ui_codegeneratorwindow.ui
+    propertypanel.h
 
 FORMS += \
     mainwindow.ui \
     codegeneratorwindow.ui
 
+#TRANSLATIONS += \
+    #CodeWings_zh_CN.ts
 CONFIG += lrelease
-CONFIG += embed_translations
+#CONFIG += embed_translations
 
 # Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+#qnx: target.path = /tmp/$${TARGET}/bin
+#else: unix:!android: target.path = /opt/$${TARGET}/bin
+#!isEmpty(target.path): INSTALLS += target
 
+#RESOURCES += \
+    #resource.qrc
 
-DISTFILES +=*/
+DISTFILES +=
