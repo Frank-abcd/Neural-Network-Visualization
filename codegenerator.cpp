@@ -1,5 +1,6 @@
 #include "codegenerator.h"
 #include <QList>
+#include <QJsonDocument>
 
 QString CodeGenerator::generatePyTorchCode(const QList<NeuralLayer*>& layers) {
     QString code = "# PyTorch 神经网络自动生成代码\n";
@@ -12,7 +13,8 @@ QString CodeGenerator::generatePyTorchCode(const QList<NeuralLayer*>& layers) {
     // 生成层定义
     for (int i = 0; i < layers.size() ; ++i) {
         const NeuralLayer* layer = layers[layers.size()-1-i];
-        if (layer->layerType == "Dense") {
+        if (layer->layerType == "Dense" || layer->layerType == "Input" ||
+            layer->layerType == "Output" || layer->layerType == "Hidden") {
             code += QString("        self.fc%1 = nn.Linear(%2, %3)\n")
             .arg(i + 1)
                 .arg(layer->inputSize)
@@ -137,5 +139,73 @@ QString CodeGenerator::generatePyTorchCode(const QList<NeuralLayer*>& layers) {
     code += "        optimizer.step()\n";
     code += "        running_loss += loss.item()\n";
     code += "    print(f'Epoch {epoch + 1}, Loss: {running_loss / len(train_loader)}')\n";
+    return code;
+}
+
+
+QString CodeGenerator::generateCodeFromJson(const QString& jsonStr) {
+    QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
+    if (!doc.isObject()) {
+        qDebug() << "错误: JSON 不是对象";
+        return "";
+    }
+
+    QJsonObject obj = doc.object();
+    if (!obj.contains("input") ||!obj.contains("output")) {
+        qDebug() << "错误: JSON 对象缺少 'input' 或 'output' 字段";
+        return "";
+    }
+
+    int inputSize = obj["input"].toInt();
+    int outputSize = obj["output"].toInt();
+
+    QList<NeuralLayer*> layers;
+
+    // 处理输入层到第一个隐藏层
+    NeuralLayer* inputLayer = new NeuralLayer();
+    inputLayer->layerType = "Dense";
+    inputLayer->inputSize = inputSize;
+    if (obj.contains("hidden") && obj["hidden"].isArray()) {
+        QJsonArray hiddenArray = obj["hidden"].toArray();
+        if (!hiddenArray.isEmpty()) {
+            inputLayer->neurons = hiddenArray[0].toInt();
+        }
+    }
+    layers.append(inputLayer);
+
+    // 处理隐藏层
+    if (obj.contains("hidden") && obj["hidden"].isArray()) {
+        QJsonArray hiddenArray = obj["hidden"].toArray();
+        for (int i = 0; i < hiddenArray.size() - 1; ++i) {
+            NeuralLayer* hiddenLayer = new NeuralLayer();
+            hiddenLayer->layerType = "Dense";
+            hiddenLayer->inputSize = hiddenArray[i].toInt();
+            hiddenLayer->neurons = hiddenArray[i + 1].toInt();
+            layers.append(hiddenLayer);
+        }
+    }
+
+    // 处理最后一个隐藏层到输出层
+    NeuralLayer* outputLayer = new NeuralLayer();
+    outputLayer->layerType = "Dense";
+    if (obj.contains("hidden") && obj["hidden"].isArray()) {
+        QJsonArray hiddenArray = obj["hidden"].toArray();
+        if (!hiddenArray.isEmpty()) {
+            outputLayer->inputSize = hiddenArray.last().toInt();
+        } else {
+            outputLayer->inputSize = inputSize;
+        }
+    }
+    outputLayer->neurons = outputSize;
+    layers.append(outputLayer);
+
+    // 生成代码
+    QString code = generatePyTorchCode(layers);
+
+    // 释放内存
+    for (NeuralLayer* layer : layers) {
+        delete layer;
+    }
+
     return code;
 }
