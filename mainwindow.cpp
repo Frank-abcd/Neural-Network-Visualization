@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     } )";
 
     qApp->setStyleSheet(qApp->styleSheet() + tooltipStyle);
-
+    ui->imagecolor->setToolTip("切换图像颜色套组");
     ui->user->setToolTip("切换界面颜色");
     ui->mode->setToolTip("切换显示模式");
     ui->generate_code->setToolTip("生成 PyTorch 代码");
@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
     themeMenu->addAction("grey", this, [=]() { applyTheme("grey"); });
 
     ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
-    /*
+
     QMenu* colorMenu = new QMenu(this);
 
     QAction* classic = new QAction("Classic", this);
@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent)
     colorMenu->addAction(vibrant);
     colorMenu->addAction(dark);
     colorMenu->addAction(ocean);
-    ui->color->setMenu(colorMenu);
+    ui->imagecolor->setMenu(colorMenu);
 
         connect(classic, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Classic");
@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent)
         ColorThemeManager::setCurrentTheme("Ocean");
         showFloatingMessage("设置cean 按generate——image更新");
     });
-*/
+
 
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);

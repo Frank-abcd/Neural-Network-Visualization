@@ -27,6 +27,6 @@ public:
 private:
     static QString s_currentTheme;
     static const QMap<QString, ColorTheme> s_themes;
-
+};
 #endif // COLORTHEMEMANAGER_H
 

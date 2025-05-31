@@ -25,6 +25,13 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QPushButton" name="imagecolor">
+       <property name="text">
+        <string>imagecolor</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="user">
        <property name="minimumSize">
         <size>
