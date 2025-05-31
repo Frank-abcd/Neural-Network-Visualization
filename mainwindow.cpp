@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     qApp->setStyleSheet(qApp->styleSheet() + tooltipStyle);
 
-    ui->color->setToolTip("切换颜色");
+    ui->user->setToolTip("切换界面颜色");
     ui->mode->setToolTip("切换显示模式");
     ui->generate_code->setToolTip("生成 PyTorch 代码");
     ui->generate_image->setToolTip("生成网络结构图像");
@@ -89,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->previous->setToolTip("返回上一步");
     ui->turnback->setToolTip("前进到下一步");
     ui->save->setToolTip("保存当前神经网络结构");
-/*
+
     QMenu* themeMenu = new QMenu("切换主题", this);
     themeMenu->addAction("white", this, [=]() { applyTheme("white"); });
     themeMenu->addAction("pink", this, [=]() { applyTheme("pink"); });
@@ -99,8 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
     themeMenu->addAction("green", this, [=]() { applyTheme("green"); });
     themeMenu->addAction("grey", this, [=]() { applyTheme("grey"); });
 
-    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮*/
-    
+    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
+    /*
     QMenu* colorMenu = new QMenu(this);
 
     QAction* classic = new QAction("Classic", this);
@@ -129,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent)
         ColorThemeManager::setCurrentTheme("Ocean");
         showFloatingMessage("设置cean 按generate——image更新");
     });
-
+*/
 
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
