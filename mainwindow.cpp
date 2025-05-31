@@ -4,6 +4,7 @@
 #include "colorthememanager.h"
 #include "backend.h"
 #include "propertypanel.h"
+#include "networkvisualizer.h"
 #include <QIcon>
 #include <QPushButton>
 #include <QJsonDocument>
@@ -113,16 +114,16 @@ MainWindow::MainWindow(QWidget *parent)
     colorMenu->addAction(ocean);
     ui->imagecolor->setMenu(colorMenu);
 
-        connect(classic, &QAction::triggered, this, [=]() {
+    connect(classic, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Classic");
         showFloatingMessage("设置Classic 按generate——image更新");
     });
     connect(vibrant, &QAction::triggered, this, [=]() {
-         ColorThemeManager::setCurrentTheme("Vibrant");
+        ColorThemeManager::setCurrentTheme("Vibrant");
         showFloatingMessage("设置Vibrant 按generate——image更新");
     });
     connect(dark, &QAction::triggered, this, [=]() {
-         ColorThemeManager::setCurrentTheme("Dark");
+        ColorThemeManager::setCurrentTheme("Dark");
         showFloatingMessage("设置Dark 按generate——image更新 ");
     });
     connect(ocean, &QAction::triggered, this, [=]() {
@@ -317,8 +318,31 @@ void MainWindow::showNetworkVisualization(const QJsonArray& layers)
 
 void MainWindow::on_start_new_clicked()
 {
+    // 1. 弹出确认对话框
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "开始新的神经网络",
+        "当前网络结构尚未保存。\n是否继续？继续将清空当前结构。",
+        QMessageBox::Yes | QMessageBox::No
+        );
 
+    if (reply == QMessageBox::No) {
+        return;
+    }
+    /*
+    if (visualizer) {
+        QJsonArray empty;
+        visualizeNetwork(empty);
+    }
+    */
+    if (codeWin) {
+        codeWin->clearNetwork();
+    }
+
+    currentNetworkSaved = false;  // 标记为未保存
+    showFloatingMessage("已清空网络结构，开始新的构建");
 }
+
 
 void MainWindow::on_previous_clicked()
 {
@@ -650,6 +674,20 @@ void MainWindow::visualizeNetwork(const QJsonArray& layers)
     }
 
     layout->addWidget(view);
+}
+
+void MainWindow::clearPreviewArea()
+{
+    QLayout* layout = ui->previewArea->layout();
+    if (!layout) return;
+
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0))) {
+        if (item->widget()) {
+            item->widget()->deleteLater();  // 删除控件
+        }
+        delete item;  // 删除布局项
+    }
 }
 
 void MainWindow::applyTheme(const QString& theme)

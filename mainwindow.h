@@ -41,6 +41,7 @@ public:
     bool currentNetworkSaved;
     QJsonArray loadHistoryByKey(const QString& key);
     void showNetworkVisualization(const QJsonArray& layers);
+    void clearPreviewArea();
     void applyTheme(const QString& theme);
 
 private:
