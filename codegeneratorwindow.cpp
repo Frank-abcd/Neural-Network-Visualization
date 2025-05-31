@@ -895,6 +895,10 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
                 selectedLayer.neurons = params["neurons"].toInt();
                 selectedLayer.activationFunction = params["activation"];
             }
+            else  if (layerType == "Hidden") {
+                selectedLayer.neurons = params["neurons"].toInt();
+                selectedLayer.activationFunction = params["activation"];
+            }
             else if (layerType == "Convolutional") {
                 selectedLayer.filters = params["filters"].toInt();
                 selectedLayer.kernelSize = params["kernel_size"].toInt();
