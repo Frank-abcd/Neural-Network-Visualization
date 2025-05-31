@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "json_utils.h"
+#include "colorthememanager.h"
 #include "backend.h"
 #include "propertypanel.h"
 #include <QIcon>
