@@ -208,12 +208,14 @@ void MainWindow::on_generate_image_clicked()
         visualizer->show();// 你来实现这个函数，基于 structure 展示图像
         ui->scrollAreavisualizer->setWidget(visualizer);
     }
-    if (currentMode=="NeuronitemGenerate"){
+    else if (currentMode=="NeuronitemGenerate"){
         visualizer->createNetwork(layers);
         visualizer->show();// 你来实现这个函数，基于 structure 展示图像
         ui->scrollAreavisualizer->setWidget(visualizer);
     }
-
+    else{
+        showWarningMessage("请选择神经网络图像模式");
+    }
 }
 
 void MainWindow::on_history_clicked()
