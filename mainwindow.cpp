@@ -71,6 +71,10 @@ MainWindow::MainWindow(QWidget *parent)
         currentMode = "BlockGenerate";
         showFloatingMessage("BlockGenerator");
     });
+    connect(neuronitemGenerateAction, &QAction::triggered, this, [=]() {
+        currentMode = "NeuronitemGenerate";
+        showFloatingMessage("NeuronitemGenerate");
+    });
 
     scene = new QGraphicsScene(this);
 
@@ -122,9 +126,17 @@ void MainWindow::on_generate_image_clicked()
     // 调用你已有的神经网络图像生成逻辑（比如显示在主界面某个区域）
     NetworkVisualizer* visualizer = new NetworkVisualizer();
     visualizer->applyColorTheme("Ocean");
-    visualizer->createNetwork(layers);
-    visualizer->show();// 你来实现这个函数，基于 structure 展示图像
-    ui->scrollAreavisualizer->setWidget(visualizer);
+    if (currentMode=="BlockGenerate"){
+        visualizer->createblockNetwork(layers);
+        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    }
+    if (currentMode=="NeuronitemGenerate"){
+        visualizer->createNetwork(layers);
+        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    }
+
 }
 
 void MainWindow::on_history_clicked()
