@@ -20,6 +20,8 @@
 #include <QMessageBox>
 #include <QToolTip>
 #include <QApplication>
+#include <QPixmap>
+#include <QPalette>
 
 PropertyPanel* propertyPanel;
 
@@ -30,6 +32,16 @@ void MainWindow::setupIconButton(QPushButton* button, const QString& iconPath, i
     // button->setStyleSheet("background-color:transparent");
 }
 
+void MainWindow::setBackground(const QString& background){
+    QPixmap pixmap(background);
+    QSize windowSize=this->size();
+    QPixmap scalePixmap=pixmap.scaled(windowSize,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+    QPalette palette=this->palette();
+    palette.setBrush(QPalette::Window,QBrush(scalePixmap));
+    this->setPalette(palette);
+    qDebug() << "背景图片是否加载成功：" << !pixmap.isNull();
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -37,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle("CodeWings:Neural-Network-Visualization");
+
+    setBackground(":/Icon/background.jpg");
 
     setupIconButton(ui->user, ":/Icon/user.png");
     setupIconButton(ui->mode, ":/Icon/mode.png");

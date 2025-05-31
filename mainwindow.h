@@ -46,6 +46,7 @@ private:
     Ui::MainWindow *ui;
     static MainWindow* s_instance;  // 添加这行
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
+    void setBackground(const QString& background);
     CodeGeneratorWindow* codegeneratorwindow;
     QGraphicsScene* scene;
     QJsonArray m_cachedNetworkJson;
