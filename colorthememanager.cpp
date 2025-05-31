@@ -28,3 +28,10 @@ void ColorThemeManager::setCurrentTheme(const QString& themeName) {
         s_currentTheme = themeName;
     }
 }
+
+void ColorThemeManager::setCurrentTheme(const QString& themeName) {
+    if (s_themes.contains(themeName)) {
+        s_currentTheme = themeName;
+    }
+}
+
