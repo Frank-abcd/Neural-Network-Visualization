@@ -27,7 +27,7 @@ void MainWindow::setupIconButton(QPushButton* button, const QString& iconPath, i
     button->setFixedSize(3*size, size);
     button->setIcon(QIcon(iconPath));
     button->setIconSize(QSize(size, size));
-    button->setStyleSheet("background-color:transparent");
+    // button->setStyleSheet("background-color:transparent");
 }
 
 MainWindow::MainWindow(QWidget *parent)
