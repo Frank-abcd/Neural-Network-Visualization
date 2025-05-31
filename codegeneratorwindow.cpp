@@ -14,6 +14,10 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneMoveEvent>
 #include <QClipboard>
+#include <QLabel>
+#include <QStatusBar>
+#include <QMessageBox>
+#include <QTimer>
 
 CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     : QDialog(parent)
@@ -143,61 +147,51 @@ void CodeGeneratorWindow::deleteSelectedLayer() {
                 return pair.first->parentItem() == selectedItem || pair.second->parentItem() == selectedItem;
             });
 
+            //将selectedItems对应的层从m_layers中删除
+            for (QGraphicsItem* selectedItem : selectedItems) {
+                // 找到与选中图元对应的层
+                for (int i = 0; i < m_layers.size(); ++i) {
+                    if (m_layers[i].layerType == selectedItem->data(0).value<NeuralLayer>().layerType) {
+                        // 从 m_layers 中移除对应的层
+                        m_layers.removeAt(i);
+                        break;
+                    }
+                }
+            }
+
             // 删除层图形项
             m_builderScene->removeItem(selectedItem);
             delete selectedItem;
         }
+    }
+    else{
+        // 显示短暂提示消息（3秒后自动消失）
+        QMessageBox* msgBox = new QMessageBox(this);
+        msgBox->setWindowTitle("Conform");
+        msgBox->setText("Please select a layer");
+        msgBox->setIcon(QMessageBox::Information);
+        msgBox->setStandardButtons(QMessageBox::NoButton); // 无按钮
+        msgBox->show();
+        // 3秒后自动关闭
+        QTimer::singleShot(3000, msgBox, &QMessageBox::deleteLater);
     }
 }
 void CodeGeneratorWindow::on_generateCodeButton_clicked() {
     QList<NeuralLayer> layers;
     QMap<ConnectionPointItem*, NeuralLayer*> pointToLayer; // 连接点到层的映射
 
-    // 收集所有层和连接点
-    for (QGraphicsItem* item : m_builderScene->items()) {
-        if (auto* layerItem = dynamic_cast<QGraphicsRectItem*>(item)) {
-            NeuralLayer layer = layerItem->data(0).value<NeuralLayer>();
-            layers.append(layer);
-            // 映射层的顶部和底部连接点
-            for (QGraphicsItem* child : layerItem->childItems()) {
-                if (auto* point = dynamic_cast<ConnectionPointItem*>(child)) {
-                    pointToLayer[point] = &layers.last();
-                }
-            }
-        }
-    }
 
     // 解析连接关系（从输出点到输入点）
     QList<NeuralLayer*> orderedLayers;
     QSet<NeuralLayer*> visited;
 
-    for (NeuralLayer& layer : layers) {
+    for (NeuralLayer& layer : m_layers) {
         orderedLayers.append(&layer);
         visited.insert(&layer);
         qDebug()<<layer.layerType;
     }
 
-    // 按连接关系遍历层
-    int currentIndex = 0;
-    while (currentIndex < orderedLayers.size()) {
-        NeuralLayer* currentLayer = orderedLayers[currentIndex];
-        // 查找当前层底部连接点的所有输出连接
-        for (const auto& conn : m_connections) {
-            if (conn.first->data(0).toString() == "bottom" &&
-                pointToLayer.contains(conn.first) &&
-                pointToLayer[conn.first] == currentLayer) {
-                NeuralLayer* nextLayer = pointToLayer[conn.second];
-                if (!visited.contains(nextLayer)) {
-                    orderedLayers.append(nextLayer);
-                    visited.insert(nextLayer);
-                }
-            }
-        }
-        currentIndex++;
-
-    }
-
-    // 生成代码（按遍历顺序）
+    // 生成代码
     QString code = CodeGenerator::generatePyTorchCode(orderedLayers);
     m_codeDisplay->setPlainText(code);
 }
@@ -259,6 +253,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         addConnectionPoints(layerItem);
     }
     else{
+        m_propertyPanel->clearParameters();
         QString layerType = item->text();
         layerType.remove(" Layer");
 
@@ -292,12 +287,10 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
                 selectedLayer.activationFunction = params["activation"];
             }
             else if (layerType == "Convolutional") {
-                // 更新卷积层特有参数 (需在 NeuralLayer 结构体中预先定义)
                 selectedLayer.filters = params["filters"].toInt();
                 selectedLayer.kernelSize = params["kernel_size"].toInt();
             }
             else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-                // 更新池化层特有参数
                 selectedLayer.poolingSize = params["pooling_size"].toInt();
             }
             else if (layerType == "LSTM" || layerType == "RNN") {
@@ -316,6 +309,17 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
                 }
             }
         }
+    }
+    else{
+        // 显示短暂提示消息（3秒后自动消失）
+        QMessageBox* msgBox = new QMessageBox(this);
+        msgBox->setWindowTitle("Conform");
+        msgBox->setText("Please select a layer");
+        msgBox->setIcon(QMessageBox::Information);
+        msgBox->setStandardButtons(QMessageBox::NoButton); // 无按钮
+        msgBox->show();
+        // 3秒后自动关闭
+        QTimer::singleShot(3000, msgBox, &QMessageBox::deleteLater);
     }
 }
 
@@ -556,7 +560,16 @@ void CodeGeneratorWindow::on_copyCodeButton_clicked() {
     QClipboard* clipboard = QApplication::clipboard();
     // 将代码复制到剪贴板
     clipboard->setText(code);
+}
+
+QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
+    QJsonArray array;
+    for (const NeuralLayer& layer : m_layers) {
+        array.append(layer.toJsonObject());
+    }
+    return array;
 }*/
+
 #include "codegeneratorwindow.h"
 #include "ui_codegeneratorwindow.h"
 #include "mainwindow.h"
@@ -609,6 +622,7 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     layersList->addItem("AveragePooling Layer");
     layersList->addItem("LSTM Layer");
     layersList->addItem("RNN Layer");
+    layersList->addItem("GRU Layer");
     layersList->addItem("Dropout Layer");
 
     // 创建一个容器，用于放置画布和属性面板
@@ -808,7 +822,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             updateLayerConnections(layerItem);
         });
 
-       
+
         params["LayerType"] = layerType;
         if(layerType =="Dense"){
             params["neurons"] = "10";
@@ -823,7 +837,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
             params["pooling_size"] = "5";
         }
-        else if (layerType == "LSTM" || layerType == "RNN") {
+        else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
             params["units"] = "128";
         }
         else if (layerType == "Dropout") {
@@ -834,7 +848,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             layer.neurons = 10;
         }
         else if (layerType == "Output") {
-           params["neurons"] = "2";
+            params["neurons"] = "2";
             layer.neurons = 2;
         }
         else if (layerType == "Hidden") {
@@ -892,10 +906,6 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
             QString layerType = params["LayerType"];
 
             if (layerType == "Dense") {
-                selectedLayer.neurons = params["neurons"].toInt();
-                selectedLayer.activationFunction = params["activation"];
-            }
-            else  if (layerType == "Hidden") {
                 selectedLayer.neurons = params["neurons"].toInt();
                 selectedLayer.activationFunction = params["activation"];
             }

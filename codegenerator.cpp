@@ -34,7 +34,6 @@ QString CodeGenerator::generatePyTorchCode(const QList<NeuralLayer*>& layers) {
                         .arg(i + 1)
                         .arg(layer->poolingSize);
         } else if (layer->layerType == "LSTM") {
-            // 使用 LSTM 特有参数 units
             code += QString("        self.lstm%1 = nn.LSTM(%2, %3)\n")
                         .arg(i + 1)
                         .arg(layer->inputSize)
@@ -44,7 +43,14 @@ QString CodeGenerator::generatePyTorchCode(const QList<NeuralLayer*>& layers) {
                         .arg(i + 1)
                         .arg(layer->inputSize)
                         .arg(layer->units);
-        } else if (layer->layerType == "Dropout") {
+        }
+        else if (layer->layerType == "GRU") {
+            code += QString("        self.gru%1 = nn.GRU(%2, %3)\n")
+                        .arg(i + 1)
+                        .arg(layer->inputSize)
+                        .arg(layer->units);
+        }
+        else if (layer->layerType == "Dropout") {
             code += QString("        self.dropout%1 = nn.Dropout(p=%2)\n")
                         .arg(i + 1)
                         .arg(layer->dropoutRate);
