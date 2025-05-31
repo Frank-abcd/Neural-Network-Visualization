@@ -61,8 +61,10 @@ MainWindow::MainWindow(QWidget *parent)
     QMenu* modeMenu = new QMenu(this);
 
     QAction* blockGenerateAction = new QAction("BlockGenerate 模式", this);
+    QAction* neuronitemGenerateAction = new QAction("NeuronitemGenerate 模式", this);
 
     modeMenu->addAction(blockGenerateAction);
+    modeMenu->addAction(neuronitemGenerateAction);
     ui->mode->setMenu(modeMenu);
 
     connect(blockGenerateAction, &QAction::triggered, this, [=]() {
