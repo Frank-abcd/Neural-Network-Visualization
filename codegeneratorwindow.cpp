@@ -844,8 +844,8 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             params["dropout_rate"] = "0.5";
         }
         else if (layerType == "Input") {
-            params["neurons"] = "10";
-            layer.neurons = 10;
+            params["neurons"] = "15";
+            layer.neurons = 15;
         }
         else if (layerType == "Output") {
             params["neurons"] = "2";
