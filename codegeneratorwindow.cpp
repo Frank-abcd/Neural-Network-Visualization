@@ -795,7 +795,6 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
 
         NeuralLayer layer;
         layer.layerType = layerType;
-        m_layers.append(layer);
 
         QColor color = colorForLayerType(layerType);
 
