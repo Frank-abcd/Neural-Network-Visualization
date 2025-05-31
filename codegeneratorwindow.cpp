@@ -533,3 +533,10 @@ void CodeGeneratorWindow::updateLayerConnections(QGraphicsRectItem* layerItem) {
     }
 }
 
+QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
+    QJsonArray array;
+    for (const NeuralLayer& layer : m_layers) {
+        array.append(layer.toJsonObject());
+    }
+    return array;
+}
