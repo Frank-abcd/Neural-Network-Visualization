@@ -169,7 +169,8 @@ void MainWindow::on_generate_image_clicked()
 
     // 调用你已有的神经网络图像生成逻辑（比如显示在主界面某个区域）
     NetworkVisualizer* visualizer = new NetworkVisualizer();
-    visualizer->applyColorTheme("Ocean");
+    QString theme = ColorThemeManager::getCurrentTheme();  // 获取当前主题
+    ColorThemeManager::setCurrentTheme(theme);
     if (currentMode=="BlockGenerate"){
         visualizer->createblockNetwork(layers);
         visualizer->show();// 你来实现这个函数，基于 structure 展示图像
