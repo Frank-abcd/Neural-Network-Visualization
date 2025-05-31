@@ -1,10 +1,12 @@
 #include "propertypanel.h"
+#include <QFormLayout>
 
 PropertyPanel::PropertyPanel(QWidget *parent) : QWidget(parent)
 {
     layout = new QFormLayout(this);
     updateBtn = new QPushButton("更新参数", this);
     layout->addWidget(updateBtn);
+    layout->setSpacing(15);
 
     connect(updateBtn, &QPushButton::clicked, this, &PropertyPanel::onUpdateButtonClicked);
 }
@@ -39,10 +41,9 @@ void PropertyPanel::onUpdateButtonClicked()
 }
 
 void PropertyPanel::clearParameters() {
-    // 清空旧参数输入框
-    for (auto& widget : fieldMap) {
-        layout->removeWidget(widget);
-        delete widget; // 删除旧的输入框，避免内存泄漏
+    // 删除所有行（除了最后的更新按钮）
+    while (layout->rowCount() > 1) {
+        layout->removeRow(0);  // 删除第一行（包括标签和输入框）
     }
     fieldMap.clear();
 }

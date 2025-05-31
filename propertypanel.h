@@ -30,4 +30,5 @@ private:
     QString currentLayerType;
 };
 
+
 #endif // PROPERTYPANEL_H
