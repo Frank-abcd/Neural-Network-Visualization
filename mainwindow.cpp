@@ -85,6 +85,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->turnback->setToolTip("前进到下一步");
     ui->save->setToolTip("保存当前神经网络结构");
 
+    QMenu* themeMenu = new QMenu("切换主题", this);
+    themeMenu->addAction("白色", this, [=]() { applyTheme("white"); });
+    themeMenu->addAction("蓝色", this, [=]() { applyTheme("blue"); });
+    themeMenu->addAction("紫色", this, [=]() { applyTheme("purple"); });
+    themeMenu->addAction("黄色", this, [=]() { applyTheme("yellow"); });
+    themeMenu->addAction("绿色", this, [=]() { applyTheme("green"); });
+
+    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
+
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
     QMenu* modeMenu = new QMenu(this);
@@ -605,6 +614,68 @@ void MainWindow::visualizeNetwork(const QJsonArray& layers)
     layout->addWidget(view);
 }
 
+void MainWindow::applyTheme(const QString& theme)
+{
+    QString bgColor;
+    QString btnColor;
+    QString btnHover;
+    QString tooltipBg = "#d0eaff";
+    QString tooltipColor = "black";
+
+    if (theme == "white") {
+        bgColor = "#ffffff";
+        btnColor = "#f0f0f0";
+        btnHover = "#dddddd";
+    } else if (theme == "blue") {
+        bgColor = "#e6f2ff";
+        btnColor = "#99ccff";
+        btnHover = "#66b3ff";
+    } else if (theme == "purple") {
+        bgColor = "#f5e6ff";
+        btnColor = "#cc99ff";
+        btnHover = "#b366ff";
+    } else if (theme == "yellow") {
+        bgColor = "#fffbe6";
+        btnColor = "#ffeb99";
+        btnHover = "#ffe066";
+    } else if (theme == "green") {
+        bgColor = "#e6ffe6";
+        btnColor = "#99ff99";
+        btnHover = "#66ff66";
+    }
+
+    // 设置全局样式
+    qApp->setStyleSheet(QString(R"(
+        QWidget {
+            background-color: %1;
+            color: black;
+        }
+        QPushButton {
+            background-color: %2;
+            border: 1px solid #666;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        QPushButton:hover {
+            background-color: %3;
+        }
+        QToolTip {
+            background-color: %4;
+            color: %5;
+            border: 1px solid gray;
+            padding: 6px;
+            border-radius: 4px;
+        }
+    )")
+                            .arg(bgColor)
+                            .arg(btnColor)
+                            .arg(btnHover)
+                            .arg(tooltipBg)
+                            .arg(tooltipColor)
+                        );
+
+    showFloatingMessage("🎨 已切换主题：" + theme);
+}
 
 MainWindow::~MainWindow()
 {
