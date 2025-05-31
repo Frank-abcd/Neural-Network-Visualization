@@ -18,6 +18,8 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QToolTip>
+#include <QApplication>
 
 PropertyPanel* propertyPanel;
 
@@ -46,9 +48,22 @@ MainWindow::MainWindow(QWidget *parent)
     setupIconButton(ui->turnback, ":/Icon/turnback.png");
     setupIconButton(ui->save, ":/Icon/save.png");
 
+    QToolTip::setFont(QFont("Microsoft YaHei", 10));
+
+    QString tooltipStyle = R"(
+    QToolTip {
+        background-color: #d0eaff;     /* 浅蓝 */
+        color: black;                  /* 黑字 */
+        border: 1px solid #007acc;
+        padding: 6px;
+        border-radius: 4px;
+    } )";
+
+    qApp->setStyleSheet(qApp->styleSheet() + tooltipStyle);
+
     ui->user->setToolTip("CodeWings用户使用介绍");
     ui->mode->setToolTip("切换显示模式");
-    ui->generate_code->setToolTip("生成 PyTorch 或 TensorFlow 代码");
+    ui->generate_code->setToolTip("生成 PyTorch 代码");
     ui->generate_image->setToolTip("生成网络结构图像");
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
