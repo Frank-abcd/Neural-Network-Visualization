@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     qApp->setStyleSheet(qApp->styleSheet() + tooltipStyle);
 
-    ui->user->setToolTip("CodeWings用户使用介绍");
+    ui->color->setToolTip("切换颜色");
     ui->mode->setToolTip("切换显示模式");
     ui->generate_code->setToolTip("生成 PyTorch 代码");
     ui->generate_image->setToolTip("生成网络结构图像");
@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->previous->setToolTip("返回上一步");
     ui->turnback->setToolTip("前进到下一步");
     ui->save->setToolTip("保存当前神经网络结构");
-
+/*
     QMenu* themeMenu = new QMenu("切换主题", this);
     themeMenu->addAction("white", this, [=]() { applyTheme("white"); });
     themeMenu->addAction("pink", this, [=]() { applyTheme("pink"); });
@@ -98,7 +98,36 @@ MainWindow::MainWindow(QWidget *parent)
     themeMenu->addAction("green", this, [=]() { applyTheme("green"); });
     themeMenu->addAction("grey", this, [=]() { applyTheme("grey"); });
 
-    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
+    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮*/
+    
+    QMenu* colorMenu = new QMenu(this);
+
+    QAction* classic = new QAction("Classic", this);
+    QAction* vibrant = new QAction("Vibrant", this);
+    QAction* dark = new QAction("Dark", this);
+    QAction* ocean = new QAction("Ocean", this);
+    colorMenu->addAction(classic);
+    colorMenu->addAction(vibrant);
+    colorMenu->addAction(dark);
+    colorMenu->addAction(ocean);
+    ui->color->setMenu(colorMenu);
+
+    connect(classic, &QAction::triggered, this, [=]() {
+        ColorThemeManager::setCurrentTheme("Classic");
+        showFloatingMessage("Classic");
+    });
+    connect(vibrant, &QAction::triggered, this, [=]() {
+         ColorThemeManager::setCurrentTheme("Vibrant");
+        showFloatingMessage("Vibrant");
+    });
+    connect(dark, &QAction::triggered, this, [=]() {
+         ColorThemeManager::setCurrentTheme("Dark");
+        showFloatingMessage("Dark ");
+    });
+    connect(ocean, &QAction::triggered, this, [=]() {
+        ColorThemeManager::setCurrentTheme("Ocean");
+        showFloatingMessage("Ocean");
+    });
 
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
