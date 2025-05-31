@@ -563,3 +563,11 @@ void CodeGeneratorWindow::on_copyCodeButton_clicked() {
     // 将代码复制到剪贴板
     clipboard->setText(code);
 }
+
+QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
+    QJsonArray array;
+    for (const NeuralLayer& layer : m_layers) {
+        array.append(layer.toJsonObject());
+    }
+    return array;
+}
