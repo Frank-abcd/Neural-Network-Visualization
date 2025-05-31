@@ -441,31 +441,62 @@ void MainWindow::showWarningMessage(const QString& text)
 void MainWindow::visualizeNetwork(const QJsonArray& layers)
 {
     QGraphicsScene* scene = new QGraphicsScene(this);
-    QGraphicsView* view = new QGraphicsView(scene);
-    view->setMinimumHeight(300);
+
+    int x = 50;
+    int y = 50;
+    int spacing = 150;
 
     for (const QJsonValue& val : layers) {
         QJsonObject obj = val.toObject();
         QString type = obj["layerType"].toString();
-        int x = obj["x"].toInt();
-        int y = obj["y"].toInt();
 
-        QGraphicsRectItem* item = new QGraphicsRectItem(0, 0, 100, 50);
+        // 1. 图层框（灰框）
+        QGraphicsRectItem* item = new QGraphicsRectItem(0, 0, 120, 60);
         item->setPos(x, y);
-        item->setBrush(Qt::lightGray);
-        item->setToolTip(type);
+
+        QColor color = Qt::lightGray;
+        if (type == "Input") color = Qt::cyan;
+        else if (type == "Dense") color = Qt::yellow;
+        else if (type == "Dropout") color = Qt::gray;
+        else if (type == "LSTM") color = Qt::green;
+        else if (type == "RNN") color = Qt::blue;
+
+        item->setBrush(color);
         scene->addItem(item);
+
+        // 2. 类型文字
+        QGraphicsTextItem* text = new QGraphicsTextItem(type);
+        text->setPos(x + 10, y + 20);
+        scene->addItem(text);
+
+        // 3. 准备下一层位置
+        y += spacing;
     }
 
-    // 假设你有一个 QWidget 区域叫 ui->previewArea
-    QLayout* layout = ui->scrollAreaWidgetContents_2->layout();
+    // 展示到画布
+    QGraphicsView* view = new QGraphicsView(scene);
+    view->setRenderHint(QPainter::Antialiasing);
+    view->setMinimumHeight(400);
+
+    // 自适应缩放（可选）
+    view->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+
+    // 清空展示区并添加
+    QLayout* layout = ui->previewArea->layout();
     if (!layout) {
-        layout = new QVBoxLayout(ui->scrollAreaWidgetContents_2);
-        ui->scrollAreaWidgetContents_2->setLayout(layout);
+        layout = new QVBoxLayout(ui->previewArea);
+        ui->previewArea->setLayout(layout);
+    } else {
+        QLayoutItem* item;
+        while ((item = layout->takeAt(0))) {
+            delete item->widget();
+            delete item;
+        }
     }
 
     layout->addWidget(view);
 }
+
 
 MainWindow::~MainWindow()
 {
