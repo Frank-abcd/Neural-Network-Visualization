@@ -48,10 +48,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    applyTheme("blue");
+
     setWindowTitle("CodeWings:Neural-Network-Visualization");
 
     setBackground(":/Icon/background.jpg");
 
+    /*
     setupIconButton(ui->user, ":/Icon/user.png");
     setupIconButton(ui->mode, ":/Icon/mode.png");
     setupIconButton(ui->generate_code, ":/Icon/code.png");
@@ -61,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupIconButton(ui->previous, ":/Icon/previous.png");
     setupIconButton(ui->turnback, ":/Icon/turnback.png");
     setupIconButton(ui->save, ":/Icon/save.png");
+    */
 
     QToolTip::setFont(QFont("Microsoft YaHei", 10));
 
@@ -86,11 +90,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->save->setToolTip("保存当前神经网络结构");
 
     QMenu* themeMenu = new QMenu("切换主题", this);
-    themeMenu->addAction("白色", this, [=]() { applyTheme("white"); });
-    themeMenu->addAction("蓝色", this, [=]() { applyTheme("blue"); });
-    themeMenu->addAction("紫色", this, [=]() { applyTheme("purple"); });
-    themeMenu->addAction("黄色", this, [=]() { applyTheme("yellow"); });
-    themeMenu->addAction("绿色", this, [=]() { applyTheme("green"); });
+    themeMenu->addAction("white", this, [=]() { applyTheme("white"); });
+    themeMenu->addAction("pink", this, [=]() { applyTheme("pink"); });
+    themeMenu->addAction("blue", this, [=]() { applyTheme("blue"); });
+    themeMenu->addAction("purple", this, [=]() { applyTheme("purple"); });
+    themeMenu->addAction("yellow", this, [=]() { applyTheme("yellow"); });
+    themeMenu->addAction("green", this, [=]() { applyTheme("green"); });
+    themeMenu->addAction("grey", this, [=]() { applyTheme("grey"); });
 
     ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
 
@@ -626,6 +632,10 @@ void MainWindow::applyTheme(const QString& theme)
         bgColor = "#ffffff";
         btnColor = "#f0f0f0";
         btnHover = "#dddddd";
+    } else if (theme == "pink") {
+        bgColor = "#ffe6f2";
+        btnColor = "#ff99cc";
+        btnHover = "#ff66b2";
     } else if (theme == "blue") {
         bgColor = "#e6f2ff";
         btnColor = "#99ccff";
@@ -642,20 +652,26 @@ void MainWindow::applyTheme(const QString& theme)
         bgColor = "#e6ffe6";
         btnColor = "#99ff99";
         btnHover = "#66ff66";
+    } else if (theme == "gray") {
+        bgColor = "#f0f0f0";
+        btnColor = "#d0d0d0";
+        btnHover = "#bbbbbb";
     }
 
     // 设置全局样式
+
     qApp->setStyleSheet(QString(R"(
         QWidget {
             background-color: %1;
             color: black;
         }
+        /*
         QPushButton {
             background-color: %2;
             border: 1px solid #666;
             padding: 5px;
             border-radius: 5px;
-        }
+        }*/
         QPushButton:hover {
             background-color: %3;
         }
@@ -673,6 +689,16 @@ void MainWindow::applyTheme(const QString& theme)
                             .arg(tooltipBg)
                             .arg(tooltipColor)
                         );
+
+    setupIconButton(ui->user, ":/Icon/user-"+theme+".png");
+    setupIconButton(ui->mode, ":/Icon/mode-"+theme+".png");
+    setupIconButton(ui->generate_code, ":/Icon/code-"+theme+".png");
+    setupIconButton(ui->generate_image, ":/Icon/image-"+theme+".png");
+    setupIconButton(ui->history, ":/Icon/history-"+theme+".png");
+    setupIconButton(ui->start_new, ":/Icon/new-"+theme+".png");
+    setupIconButton(ui->previous, ":/Icon/previous-"+theme+".png");
+    setupIconButton(ui->turnback, ":/Icon/turnback-"+theme+".png");
+    setupIconButton(ui->save, ":/Icon/save-"+theme+".png");
 
     showFloatingMessage("🎨 已切换主题：" + theme);
 }
