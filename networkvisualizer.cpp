@@ -48,7 +48,7 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
     QGraphicsEllipseItem* plus = nullptr;
     QGraphicsRectItem* act = nullptr;
 
-    if (layerName != "input" && layerName != "output") {
+    if (layerName == "Hidden"||layerName == "Dense") {
         w = new QGraphicsRectItem(0, 0, 30, 30);
         w->setBrush(theme.weightBoxFill);//Qt::cyan
         w->setPos(10, 30);
@@ -62,7 +62,6 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
         group->addToGroup(b);
         QGraphicsTextItem* bLabel = new QGraphicsTextItem("b", b);
         bLabel->setPos(8, 5);
-
         plus = new QGraphicsEllipseItem(0, 0, 20, 20);
         plus->setBrush(theme.neuronFill);//Qt::white
         plus->setPos(width / 2 - 10, 60);
