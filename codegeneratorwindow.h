@@ -196,6 +196,7 @@ public slots:
     void updateDragPath(const QPointF& pos);//
     void updateLayerConnections(QGraphicsRectItem* layerItem);//
     void on_copyCodeButton_clicked();
+    void clearNetwork();
 
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;//
