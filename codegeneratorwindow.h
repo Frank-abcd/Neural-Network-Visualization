@@ -65,7 +65,6 @@ class CodeGeneratorWindow : public QDialog
 
 public:
     explicit CodeGeneratorWindow(QWidget *parent = nullptr);
-    QJsonArray getNetworkAsJson() const;
     ~CodeGeneratorWindow();
 
 public slots:
@@ -84,6 +83,7 @@ public slots:
     void createConnection(ConnectionPointItem* fromPoint, ConnectionPointItem* toPoint);//
     void updateDragPath(const QPointF& pos);//
     void updateLayerConnections(QGraphicsRectItem* layerItem);//
+    void on_copyCodeButton_clicked();
 
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;//
@@ -105,6 +105,7 @@ private:
     bool isInCustomMode;
     QList<QGraphicsPathItem*> m_connectionItems;
     QGraphicsLineItem* m_dragLine;
+    QPushButton* m_copyCodeButton;
 };
 
 #endif // CODEGENERATORWINDOW_H

@@ -1,7 +1,6 @@
 #include "codegeneratorwindow.h"
 #include "ui_codegeneratorwindow.h"
 #include "mainwindow.h"
-#include "networkvisualizer.h"
 #include "propertypanel.h"
 #include "codegenerator.h"
 #include <QGraphicsRectItem>
@@ -14,6 +13,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneMoveEvent>
+#include <QClipboard>
 
 CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     : QDialog(parent)
@@ -36,7 +36,6 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
 
     // Layer selection area
-    QHBoxLayout* layersLayout = new QHBoxLayout();
     QListWidget* layersList = new QListWidget(this);
     layersList->addItem("Input Layer");
     layersList->addItem("Hidden Layer");
@@ -48,17 +47,37 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     layersList->addItem("LSTM Layer");
     layersList->addItem("RNN Layer");
     layersList->addItem("Dropout Layer");
+
+    // 创建一个容器，用于放置画布和属性面板
+    QWidget* canvasAndPanelContainer = new QWidget(this);
+    QHBoxLayout* innerLayout = new QHBoxLayout(canvasAndPanelContainer);
+    innerLayout->addWidget(m_builderView);
+    innerLayout->addWidget(m_propertyPanel);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+
+    // 创建一个滚动区域，并将容器放入其中
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(canvasAndPanelContainer);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+    // 左侧层选择列表和滚动区域的布局
+    QHBoxLayout* layersLayout = new QHBoxLayout();
     layersLayout->addWidget(layersList);
-
-    // Canvas area
-    layersLayout->addWidget(m_builderView);
-
-    // Property panel
-    layersLayout->addWidget(m_propertyPanel);
+    layersLayout->addWidget(scrollArea);
 
     // Code display area
     mainLayout->addLayout(layersLayout);
     mainLayout->addWidget(m_codeDisplay);
+
+    // 创建一个水平布局用于放置现有的代码显示框和复制按钮
+    QHBoxLayout* codeLayout = new QHBoxLayout();
+    codeLayout->addWidget(m_codeDisplay); // 使用现有的代码显示框
+    // 创建复制按钮
+    m_copyCodeButton = new QPushButton("复制", this);
+    connect(m_copyCodeButton, &QPushButton::clicked, this, &CodeGeneratorWindow::on_copyCodeButton_clicked);
+    codeLayout->addWidget(m_copyCodeButton, 0, Qt::AlignTop | Qt::AlignRight);
+    mainLayout->addLayout(codeLayout);
 
     setLayout(mainLayout);
 
@@ -230,12 +249,15 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         layerItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         layerItem->setAcceptDrops(true);
 
-        QGraphicsProxyWidget* proxyWidget = new QGraphicsProxyWidget(layerItem);
-        QMenu* contextMenu = new QMenu();
-        contextMenu->addAction("Delete", this, [=]() {
-            deleteSelectedLayer();
-        });
-        proxyWidget->setWidget(contextMenu);
+        // QGraphicsProxyWidget* proxyWidget = new QGraphicsProxyWidget(layerItem);
+        // QMenu* contextMenu = new QMenu();
+        // contextMenu->addAction("Delete", this, [=]() {
+        //     deleteSelectedLayer();
+        // });
+        // proxyWidget->setWidget(contextMenu);
+        QGraphicsTextItem* layerNameText = new QGraphicsTextItem(layerType, layerItem);
+        layerNameText->setPos(layerItem->rect().center().x() - layerNameText->boundingRect().width() / 2,
+                              layerItem->rect().center().y() - layerNameText->boundingRect().height() / 2);
 
         layerItem->setZValue(1);
 
@@ -533,10 +555,11 @@ void CodeGeneratorWindow::updateLayerConnections(QGraphicsRectItem* layerItem) {
     }
 }
 
-QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
-    QJsonArray array;
-    for (const NeuralLayer& layer : m_layers) {
-        array.append(layer.toJsonObject());
-    }
-    return array;
+void CodeGeneratorWindow::on_copyCodeButton_clicked() {
+    // 获取代码显示框中的文本
+    QString code = m_codeDisplay->toPlainText();
+    // 获取系统剪贴板
+    QClipboard* clipboard = QApplication::clipboard();
+    // 将代码复制到剪贴板
+    clipboard->setText(code);
 }
