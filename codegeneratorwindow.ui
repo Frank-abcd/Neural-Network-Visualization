@@ -26,24 +26,6 @@
     <string>      神经网络搭建平台</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="return_mainwindow">
-   <property name="geometry">
-    <rect>
-     <x>880</x>
-     <y>680</y>
-     <width>93</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="text">
-    <string>返回主界面</string>
-   </property>
-  </widget>
-  <zorder>return_mainwindow</zorder>
-  <zorder>label</zorder>
  </widget>
  <resources/>
  <connections/>
