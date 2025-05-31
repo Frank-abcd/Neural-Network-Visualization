@@ -722,7 +722,7 @@ void MainWindow::applyTheme(const QString& theme)
         bgColor = "#e6ffe6";
         btnColor = "#99ff99";
         btnHover = "#66ff66";
-    } else if (theme == "gray") {
+    } else if (theme == "grey") {
         bgColor = "#f0f0f0";
         btnColor = "#d0d0d0";
         btnHover = "#bbbbbb";
@@ -769,6 +769,7 @@ void MainWindow::applyTheme(const QString& theme)
     setupIconButton(ui->previous, ":/Icon/previous-"+theme+".png");
     setupIconButton(ui->turnback, ":/Icon/turnback-"+theme+".png");
     setupIconButton(ui->save, ":/Icon/save-"+theme+".png");
+    setupIconButton(ui->imagecolor, ":/Icon/color-"+theme+".png");
 
     showFloatingMessage("🎨 已切换主题：" + theme);
 }
