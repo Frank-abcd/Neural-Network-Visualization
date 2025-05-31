@@ -42,11 +42,13 @@ void receiveNetworkStructure(const QString& jsonStr) {
         return;
     }
 
-    QList<NeuralLayer> layers;
+    QList<NeuralLayer*> layers;
     for (const QJsonValue &layerValue : layersArray) {
         NeuralLayer layer = NeuralLayer::fromJsonObject(layerValue.toObject());
-        layers.append(layer);
-        qDebug() << "解析层:" << layer.layerType << layer.neurons;
+        NeuralLayer* layerPtr = new NeuralLayer(layer);
+
+        layers.append(layerPtr);
+        qDebug() << "解析层:" << layerPtr->layerType << layerPtr->neurons;
     }
 
     // 生成 PyTorch 代码并返回

@@ -10,9 +10,9 @@ class NeuralLayer
 public:
 
     QString layerType;//层定义
-    int neurons;//神经元数量
-    int inputSize;//输入维度
-    QString activationFunction;//激活函数
+    int neurons = 1000;//神经元数量
+    int inputSize = 128;//输入维度
+    QString activationFunction = "relu";//激活函数
     NeuralLayer();
     QJsonObject toJsonObject()const;//将NeuralLayer对象转化为QJsonObject，以后可拼接为QJsonArray
     static NeuralLayer fromJsonObject(const QJsonObject& obj);// 从QJsonObject构造NeuralLayer的静态函数声明
