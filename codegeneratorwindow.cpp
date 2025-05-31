@@ -1192,3 +1192,10 @@ QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
     }
     return array;
 }
+
+void CodeGeneratorWindow::clearNetwork()
+{
+    m_layers.clear();              // 清空网络层数据
+    m_builderScene->clear();      // 清空画布
+    m_codeDisplay->clear();       // 清空代码框
+}
