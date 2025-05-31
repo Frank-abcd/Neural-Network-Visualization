@@ -36,7 +36,7 @@
         <string notr="true"/>
        </property>
        <property name="text">
-        <string>user</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -49,7 +49,7 @@
         </size>
        </property>
        <property name="text">
-        <string>mode</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -68,49 +68,49 @@
         <string notr="true">font: 6pt &quot;Microsoft YaHei UI&quot;;</string>
        </property>
        <property name="text">
-        <string>generatorcode</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="generate_image">
        <property name="text">
-        <string>generate_image</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="history">
        <property name="text">
-        <string>history</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="start_new">
        <property name="text">
-        <string>start_new</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="previous">
        <property name="text">
-        <string>previous</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="turnback">
        <property name="text">
-        <string>turnback</string>
+        <string/>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="save">
        <property name="text">
-        <string>save</string>
+        <string/>
        </property>
       </widget>
      </item>
