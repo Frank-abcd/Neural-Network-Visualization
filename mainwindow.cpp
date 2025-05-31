@@ -17,7 +17,7 @@
 #include <QProgressBar>
 #include <QDialog>
 #include <QListWidget>
-
+#include <QMessageBox>
 
 PropertyPanel* propertyPanel;
 
@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene = new QGraphicsScene(this);
 
+    currentNetworkSaved=0;
 }
 
 void MainWindow::on_user_clicked()
@@ -161,6 +162,59 @@ void MainWindow::on_history_clicked()
     dialog->exec();
 }
 
+void MainWindow::onHistoryRecordClicked(const QString& recordKey)
+{
+    // 1. 如果当前结构未保存，弹出确认对话框
+    if (!currentNetworkSaved) {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "未保存更改",
+            "当前网络结构尚未保存，是否继续查看所选历史记录？\n继续将丢弃当前修改。",
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (reply == QMessageBox::No) {
+            return;  // 返回当前记录，不做任何操作
+        }
+    }
+
+    // 2. 用户确认继续后，加载选中记录
+    QJsonArray data = loadHistoryByKey(recordKey);
+    showNetworkVisualization(data);
+    showFloatingMessage("✅ 已加载历史记录：" + recordKey);
+}
+
+QJsonArray MainWindow::loadHistoryByKey(const QString& key)
+{
+    QFile file("history.json");
+    if (!file.open(QIODevice::ReadOnly)) return {};
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    return doc.object().value(key).toArray();
+}
+
+void MainWindow::showNetworkVisualization(const QJsonArray& layers)
+{
+    // 1. 清空预览区域
+    QLayout* layout = ui->previewArea->layout();
+    if (!layout) {
+        layout = new QVBoxLayout(ui->previewArea);
+        ui->previewArea->setLayout(layout);
+    }
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (item->widget()) delete item->widget();
+        delete item;
+    }
+
+    // 2. 创建 NetworkVisualizer 实例（或重用）
+    if (!visualizer) {
+        visualizer = new NetworkVisualizer(this);  // 你已定义的绘图类
+    }
+
+    // visualizer->createNetwork(layers);  // 设置图数据并触发更新
+    layout->addWidget(visualizer);
+}
+
 void MainWindow::on_start_new_clicked()
 {
 
@@ -205,6 +259,7 @@ void MainWindow::on_save_clicked()
         file.close();
     }
 
+    currentNetworkSaved=1;
     showSaveProgressBarMessage();
 }
 

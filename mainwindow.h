@@ -6,6 +6,7 @@
 #include <QJsonArray>
 #include <QGraphicsScene>
 #include  "codegeneratorwindow.h"
+#include <networkvisualizer.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,6 +37,10 @@ public:
     void loadNetworkFromJson(const QJsonArray& layers);
     void showWarningMessage(const QString& text);
     void visualizeNetwork(const QJsonArray& layers);
+    void onHistoryRecordClicked(const QString& recordKey);
+    bool currentNetworkSaved;
+    QJsonArray loadHistoryByKey(const QString& key);
+    void showNetworkVisualization(const QJsonArray& layers);
 
 private:
     Ui::MainWindow *ui;
@@ -45,6 +50,7 @@ private:
     QGraphicsScene* scene;
     QJsonArray m_cachedNetworkJson;
     CodeGeneratorWindow* codeWin = nullptr;
+    NetworkVisualizer* visualizer = nullptr;
 
 private slots:
     void on_user_clicked();
