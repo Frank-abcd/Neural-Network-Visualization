@@ -253,10 +253,13 @@ void MainWindow::on_history_clicked()
         if (file.open(QIODevice::ReadOnly)) {
             QJsonArray history = QJsonDocument::fromJson(file.readAll()).array();
             QJsonObject selected = history[index].toObject()["network"].toObject();
-            QJsonArray layers = selected["layers"].toArray();
+            // QJsonArray layers = selected["layers"].toArray();
 
-            loadNetworkFromJson(layers);  // 你写的载入函数
-            showFloatingMessage("已载入历史记录！");
+            // loadNetworkFromJson(layers);  // 你写的载入函数
+
+            QString recordKey=selected["timestamp"].toString();
+            onHistoryRecordClicked(recordKey);
+            // showFloatingMessage("已载入历史记录！");
             dialog->accept();
         }
     });
@@ -269,7 +272,7 @@ void MainWindow::on_history_clicked()
 void MainWindow::onHistoryRecordClicked(const QString& recordKey)
 {
     // 1. 如果当前结构未保存，弹出确认对话框
-    if (!currentNetworkSaved) {
+    if (!currentNetworkSaved && codeWin) {
         QMessageBox::StandardButton reply = QMessageBox::question(
             this,
             "未保存更改",
@@ -278,14 +281,40 @@ void MainWindow::onHistoryRecordClicked(const QString& recordKey)
             );
 
         if (reply == QMessageBox::No) {
+            showFloatingMessage("已取消加载历史记录");
             return;  // 返回当前记录，不做任何操作
         }
     }
 
     // 2. 用户确认继续后，加载选中记录
-    QJsonArray data = loadHistoryByKey(recordKey);
-    showNetworkVisualization(data);
-    showFloatingMessage("✅ 已加载历史记录：" + recordKey);
+    // QJsonArray data = loadHistoryByKey(recordKey);
+    // showNetworkVisualization(data);
+    // showFloatingMessage("✅ 已加载历史记录：" + recordKey);
+
+    // 搞不懂这段为什么不能正常加载出历史网络
+    QJsonArray structure = loadHistoryByKey(recordKey);
+    QList<NeuralLayer> layers;
+    for (const QJsonValue& val : structure) {
+        if (val.isObject()) {
+            layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+        }
+    }
+    NetworkVisualizer* visualizer = new NetworkVisualizer();
+    QString theme = ColorThemeManager::getCurrentTheme();  // 获取当前主题
+    ColorThemeManager::setCurrentTheme(theme);
+    if (currentMode=="BlockGenerate"){
+        visualizer->createblockNetwork(layers);
+        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    }
+    else if (currentMode=="NeuronitemGenerate"){
+        visualizer->createNetwork(layers);
+        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    }
+    else{
+        showWarningMessage("请选择神经网络图像模式");
+    }
 }
 
 QJsonArray MainWindow::loadHistoryByKey(const QString& key)
@@ -296,6 +325,7 @@ QJsonArray MainWindow::loadHistoryByKey(const QString& key)
     return doc.object().value(key).toArray();
 }
 
+/*
 void MainWindow::showNetworkVisualization(const QJsonArray& layers)
 {
     // 1. 清空预览区域
@@ -318,6 +348,7 @@ void MainWindow::showNetworkVisualization(const QJsonArray& layers)
     // visualizer->createNetwork(layers);  // 设置图数据并触发更新
     layout->addWidget(visualizer);
 }
+*/
 
 void MainWindow::on_start_new_clicked()
 {
@@ -330,6 +361,10 @@ void MainWindow::on_start_new_clicked()
         );
 
     if (reply == QMessageBox::No) {
+        return;
+    }
+
+    if (!codeWin) {
         return;
     }
 
