@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "json_utils.h"
 #include "colorthememanager.h"
 #include "backend.h"
 #include "propertypanel.h"
@@ -50,7 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    original=1;
     applyTheme("blue");
+    original=0;
 
     setWindowTitle("CodeWings:Neural-Network-Visualization");
 
@@ -331,15 +332,25 @@ void MainWindow::on_start_new_clicked()
     if (reply == QMessageBox::No) {
         return;
     }
-    /*
-    if (visualizer) {
-        QJsonArray empty;
-        visualizeNetwork(empty);
-    }
-    */
+
+    // 2. 确认清空神经网络结构及图像
     if (codeWin) {
         codeWin->clearNetwork();
     }
+
+    QJsonArray structure = codeWin->getNetworkAsJson();
+    QList<NeuralLayer> layers;
+    for (const QJsonValue& val : structure) {
+        if (val.isObject()) {
+            layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+        }
+    }
+    NetworkVisualizer* visualizer = new NetworkVisualizer();
+    QString theme = ColorThemeManager::getCurrentTheme();
+    ColorThemeManager::setCurrentTheme(theme);
+    visualizer->createblockNetwork(layers);
+    visualizer->show();
+    ui->scrollAreavisualizer->setWidget(visualizer);
 
     currentNetworkSaved = false;  // 标记为未保存
     showFloatingMessage("已清空网络结构，开始新的构建");
@@ -773,7 +784,9 @@ void MainWindow::applyTheme(const QString& theme)
     setupIconButton(ui->save, ":/Icon/save-"+theme+".png");
     setupIconButton(ui->imagecolor, ":/Icon/color-"+theme+".png");
 
-    showFloatingMessage("🎨 已切换主题：" + theme);
+    if (!original) {
+        showFloatingMessage("🎨 已切换主题：" + theme);
+    }
 }
 
 MainWindow::~MainWindow()
