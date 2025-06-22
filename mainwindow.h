@@ -43,6 +43,7 @@ public:
     void showNetworkVisualization(const QJsonArray& layers);
     void clearPreviewArea();
     void applyTheme(const QString& theme);
+    bool original;
 
 private:
     Ui::MainWindow *ui;
