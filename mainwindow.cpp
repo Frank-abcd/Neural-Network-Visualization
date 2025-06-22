@@ -84,7 +84,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->imagecolor->setToolTip("切换图像颜色套组");
     ui->user->setToolTip("切换界面颜色");
     ui->mode->setToolTip("切换显示模式");
-    ui->generate_code->setToolTip("生成 PyTorch 代码");
+    ui->generate_code->setToolTip("生成Pytorch代码");
+    // ui->generate_code->setToolTip("生成 PyTorch 代码");
     ui->generate_image->setToolTip("生成网络结构图像");
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
@@ -129,7 +130,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(ocean, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Ocean");
-        showFloatingMessage("设置cean 按generate——image更新");
+        showFloatingMessage("设置Ocean 按generate——image更新");
     });
 
 
