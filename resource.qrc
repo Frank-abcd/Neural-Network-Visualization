@@ -71,5 +71,10 @@
         <file>Icon/save-purple.png</file>
         <file>Icon/save-white.png</file>
         <file>Icon/save-yellow.png</file>
+        <file>images/neural_network_1.png</file>
+        <file>images/neural_network_2.png</file>
+        <file>images/neural_network_3.png</file>
+        <file>images/neural_network_4.png</file>
+        <file>images/neural_network_5.png</file>
     </qresource>
 </RCC>
