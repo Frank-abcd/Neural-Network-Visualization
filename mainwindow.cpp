@@ -4,6 +4,7 @@
 #include "backend.h"
 #include "propertypanel.h"
 #include "networkvisualizer.h"
+#include “matrial.h"
 #include <QIcon>
 #include <QPushButton>
 #include <QJsonDocument>
@@ -137,6 +138,10 @@ MainWindow::MainWindow(QWidget *parent)
     codegeneratorwindow = new CodeGeneratorWindow(this);
     connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
     QMenu* modeMenu = new QMenu(this);
+
+    matrialwindow = new Matrial(this);
+    matrialwindow->hide();
+    connect(ui->turnback, &QPushButton::clicked, this, &MainWindow::on_turnback_clicked);
 
     QAction* blockGenerateAction = new QAction("BlockGenerate 模式", this);
     QAction* neuronitemGenerateAction = new QAction("NeuronitemGenerate 模式", this);
@@ -405,7 +410,8 @@ void MainWindow::on_toolButton_clicked()
 
 void MainWindow::on_turnback_clicked()
 {
-
+    this->hide();
+    matrialwindow->show();
 }
 
 void MainWindow::on_save_clicked()
