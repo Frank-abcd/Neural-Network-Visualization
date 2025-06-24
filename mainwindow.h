@@ -7,6 +7,7 @@
 #include <QGraphicsScene>
 #include "codegeneratorwindow.h"
 #include "networkvisualizer.h"
+#include "matrial.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -51,6 +52,7 @@ private:
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
     void setBackground(const QString& background);
     CodeGeneratorWindow* codegeneratorwindow;
+    Matrial* matrialwindow;
     QGraphicsScene* scene;
     QJsonArray m_cachedNetworkJson;
     CodeGeneratorWindow* codeWin = nullptr;
