@@ -358,7 +358,13 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
         //     else if (layerType == "Dropout") {
         //         selectedLayer.dropoutRate = params["dropout_rate"].toFloat();
         //     }
-        //     // 更新其他层类型参数...
+        //      else if (layerType == "Hidden") {
+                selectedLayer.neurons = params["neurons"].toInt();
+                selectedLayer.activationFunction = params["activation"];
+            }
+            else if (layerType == "Output") {
+                selectedLayer.neurons = params["neurons"].toInt();
+            }
 
         //     // 更新 m_layers 中对应层
         //     for (int i = 0; i < m_layers.size(); ++i) {
