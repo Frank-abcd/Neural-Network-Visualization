@@ -85,8 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->imagecolor->setToolTip("切换图像颜色套组");
     ui->user->setToolTip("切换界面颜色");
     ui->mode->setToolTip("切换显示模式");
-    ui->generate_code->setToolTip("生成Pytorch代码");
-    // ui->generate_code->setToolTip("生成 PyTorch 代码");
+    ui->generate_code->setToolTip("生成 PyTorch 代码");
     ui->generate_image->setToolTip("生成网络结构图像");
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
@@ -261,11 +260,10 @@ void MainWindow::on_history_clicked()
             QJsonObject selected = history[index].toObject()["network"].toObject();
             // QJsonArray layers = selected["layers"].toArray();
 
-            // loadNetworkFromJson(layers);  // 你写的载入函数
-
             QString recordKey=selected["timestamp"].toString();
             onHistoryRecordClicked(recordKey);
-            // showFloatingMessage("已载入历史记录！");
+            //loadNetworkFromJson(layers);  // 你写的载入函数
+            //showFloatingMessage("已载入历史记录！");
             dialog->accept();
         }
     });
@@ -331,7 +329,6 @@ QJsonArray MainWindow::loadHistoryByKey(const QString& key)
     return doc.object().value(key).toArray();
 }
 
-/*
 void MainWindow::showNetworkVisualization(const QJsonArray& layers)
 {
     // 1. 清空预览区域
@@ -354,7 +351,6 @@ void MainWindow::showNetworkVisualization(const QJsonArray& layers)
     // visualizer->createNetwork(layers);  // 设置图数据并触发更新
     layout->addWidget(visualizer);
 }
-*/
 
 void MainWindow::on_start_new_clicked()
 {
