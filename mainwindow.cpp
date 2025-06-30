@@ -152,6 +152,8 @@ MainWindow::MainWindow(QWidget *parent)
     scene = new QGraphicsScene(this);
 
     currentNetworkSaved=0;
+
+    position=-1;
 }
 
 void MainWindow::on_userGuide_clicked()
@@ -192,6 +194,7 @@ void MainWindow::on_generateImage_clicked()
     }
     QString label = QString("%1 | %2").arg(timestamp) .arg(modeLabel);
     historyLabel.push_back(label);
+    position = historyCache.size() - 1;
 
     QList<NeuralLayer> layers;
     for (const QJsonValue& val : structure) {
@@ -301,6 +304,7 @@ void MainWindow::on_checkHistory_clicked()
 }
 
 void MainWindow::onHistoryRecordClicked(int index){
+    position = index;
     const QJsonArray& structure = historyCache[index];
     QList<NeuralLayer> layers;
     for (const QJsonValue& val : structure) {
@@ -391,14 +395,66 @@ void MainWindow::on_startNew_clicked()
     showFloatingMessage("已清空网络结构，开始新的构建");
 }
 
-void MainWindow::on_lastStep_clicked()
-{
+void MainWindow::on_lastStep_clicked(){
+    qDebug()<<position<<" "<<historyCache.size();
+    if (position == 0){
+        showWarningMessage("已经是第一步");
+        return;
+    }
+    position -= 1;
+    const QJsonArray& structure = historyCache[position];
+    QList<NeuralLayer> layers;
+    for (const QJsonValue& val : structure) {
+        if (val.isObject()) {
+            layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+        }
+    }
+    NetworkVisualizer* visualizer = new NetworkVisualizer(this);
+    visualizer->setMinimumSize(600, 400);
+    QString theme = ColorThemeManager::getCurrentTheme();
+    ColorThemeManager::setCurrentTheme(theme);
 
+    if (currentMode == "BlockGenerate") {
+        visualizer->createblockNetwork(layers);
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    } else if (currentMode == "NeuronitemGenerate") {
+        visualizer->createNetwork(layers);
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    } else {
+        delete visualizer;
+        showWarningMessage("❗ 当前未选择图像模式，请先设置图像生成模式！");
+        return;
+    }
 }
 
-void MainWindow::on_nextStep_clicked()
-{
-
+void MainWindow::on_nextStep_clicked(){
+    if (position == historyCache.size() - 1){
+        showWarningMessage("已经是最后一步");
+        return;
+    }
+    position += 1;
+    const QJsonArray& structure = historyCache[position];
+    QList<NeuralLayer> layers;
+    for (const QJsonValue& val : structure) {
+        if (val.isObject()) {
+            layers.append(NeuralLayer::fromJsonObject(val.toObject()));
+        }
+    }
+    NetworkVisualizer* visualizer = new NetworkVisualizer(this);
+    visualizer->setMinimumSize(600, 400);
+    QString theme = ColorThemeManager::getCurrentTheme();
+    ColorThemeManager::setCurrentTheme(theme);
+    if (currentMode == "BlockGenerate") {
+        visualizer->createblockNetwork(layers);
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    } else if (currentMode == "NeuronitemGenerate") {
+        visualizer->createNetwork(layers);
+        ui->scrollAreavisualizer->setWidget(visualizer);
+    } else {
+        delete visualizer;
+        showWarningMessage("❗ 当前未选择图像模式，请先设置图像生成模式！");
+        return;
+    }
 }
 
 void MainWindow::on_saveCurrent_clicked(){
@@ -419,6 +475,7 @@ void MainWindow::on_saveCurrent_clicked(){
         }
         QString label = QString("%1 | %2").arg(timestamp) .arg(modeLabel);
         historyLabel.push_back(label);
+        position = historyCache.size() - 1;
     }
     *(historySaved.rbegin())=true;
 
