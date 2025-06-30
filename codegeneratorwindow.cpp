@@ -230,8 +230,8 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             layer.kernelSize = 5;
         }
         else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-            params["pooling_size"] = "5";
-            layer.poolingSize = 5;
+            params["pooling_size"] = "4";
+            layer.poolingSize =4;
             layer.neurons = 1;
         }
         else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
