@@ -196,7 +196,7 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
 }
 
 void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
-    if (!isInCustomMode){
+        if (!isInCustomMode){
         QString layerType = item->text();
         layerType.remove(" Layer");
 
@@ -228,8 +228,9 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             params["kernel_size"] = "5";
             layer.filters = 32;
             layer.kernelSize = 5;
+            layer.neurons = 1;
         }
-        else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+        else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
             params["pooling_size"] = "4";
             layer.poolingSize =4;
             layer.neurons = 1;
@@ -312,7 +313,7 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
             layer.filters = params["filters"].toInt();
             layer.kernelSize = params["kernel_size"].toInt();
         }
-        else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+        else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
             layer.poolingSize = params["pooling_size"].toInt();
         }
         else if (layerType == "LSTM" || layerType == "RNN") {
