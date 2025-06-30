@@ -62,18 +62,6 @@
      </item>
      <item>
       <widget class="QPushButton" name="generate_code">
-       <property name="minimumSize">
-        <size>
-         <width>119</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;切换界面&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 6pt &quot;Microsoft YaHei UI&quot;;</string>
-       </property>
        <property name="text">
         <string/>
        </property>
