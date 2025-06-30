@@ -12,7 +12,13 @@
 #include <QPen>
 #include <QBrush>
 
-
+/*
+struct NeuralLayer {
+    QString layerType; // 新增：类型（如 Dense）
+    int inputSize;     // 输入维度
+    int neurons;       // 神经元数量
+    QString activationFunction; // 激活函数
+};*/
 
 class NetworkVisualizer : public QGraphicsView {
     Q_OBJECT
@@ -25,10 +31,12 @@ public:
     QGraphicsItemGroup* createDetailedLayer(const NeuralLayer& layer , int yPos);
 
 protected:
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
+    //void mousePressEvent(QMouseEvent* event) override;
+    //void mouseMoveEvent(QMouseEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+
+
 
 private:
     QGraphicsScene* m_scene;

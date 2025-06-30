@@ -18,3 +18,7 @@ void ConnectionItem::updateColor() {
     setPen(pen);
 }
 
+void ConnectionItem::updateLine(const QPointF& from, const QPointF& to) {
+    setLine(QLineF(from, to));
+}
+

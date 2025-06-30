@@ -191,11 +191,15 @@ void NetworkVisualizer::createNetwork(const QList<NeuralLayer>& layers) {
         for (NeuronItem* from : allNeurons[i]) {
             for (NeuronItem* to : allNeurons[i + 1]) {
                 double weight = QRandomGenerator::global()->bounded(1.0);
-                ConnectionItem* conn = new ConnectionItem(from->pos(), to->pos(), weight);
+                ConnectionItem* conn = new ConnectionItem(from->scenePos(), to->scenePos(), weight);
                 m_scene->addItem(conn);
+
+                from->addOutgoingConnection(conn);
+                to->addIncomingConnection(conn);
             }
         }
     }
+
 }
 
 void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
@@ -276,6 +280,7 @@ void NetworkVisualizer::applyColorTheme(const QString& themeName) {
         }
     }
 
+/*
 
 void NetworkVisualizer::mouseMoveEvent(QMouseEvent* event) {
     if (m_dragItem) {
@@ -299,7 +304,7 @@ void NetworkVisualizer::mousePressEvent(QMouseEvent* event) {
         drag->exec();
     }
     QGraphicsView::mousePressEvent(event);
-}
+}*/
 
 void NetworkVisualizer::dragMoveEvent(QDragMoveEvent* event) {
     if (event->mimeData()->hasFormat("application/x-layer")) {
