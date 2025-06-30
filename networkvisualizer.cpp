@@ -69,7 +69,7 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
     title->setPos(40, 5);
     group->addToGroup(title);
 
-    // 图形项
+    // 图形
     QGraphicsRectItem* w = nullptr;
     QGraphicsRectItem* b = nullptr;
     QGraphicsEllipseItem* plus = nullptr;
@@ -97,18 +97,18 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
         plusLabel->setPos(2, 0);
     }
     if (layerName == "Dropout") {
-        // 1. 创建 Dropout 层的矩形框（初始宽度设为 100，后面会根据文本调整）
+        //Dropout 层框
         QGraphicsRectItem* act = new QGraphicsRectItem(0, 0, 100, 26);
         act->setBrush(theme.activationBoxFill);
         act->setPos(30, 90);
         group->addToGroup(act);
 
-        // 2. 创建标签文本（强制显示 4 位小数）
-        QString dropoutText = QString("rate: %1").arg(layer.dropoutRate, 0, 'f', 4);
+        // 标签文本
+        QString dropoutText = QString("rate: %1").arg(layer.dropoutRate, 0, 'f', 4);//（4位小数）
         QGraphicsTextItem* actLabel = new QGraphicsTextItem(dropoutText, act);
         actLabel->setPos(10, 5);
 
-        // 3. 动态计算文本宽度，并调整矩形框大小
+        // 动态计算文本宽度调整矩形框大小
         QFontMetrics metrics(actLabel->font());
         int textWidth = metrics.horizontalAdvance(dropoutText);  // 获取文本像素宽度
         act->setRect(0, 0, textWidth + 20, 26);
@@ -130,7 +130,7 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
     if (act) act->setZValue(1);
 
 
-    // 连线（局部坐标系内连接）
+    // 连线（局部坐标系内）
     if (w && b && plus) {
         QPointF wCenter = w->pos() + QPointF(w->rect().width() / 2, w->rect().height() / 2);
         QPointF bCenter = b->pos() + QPointF(b->rect().width() / 2, b->rect().height() / 2);
@@ -184,19 +184,19 @@ void NetworkVisualizer::createNetwork(const QList<NeuralLayer>& layers) {
         const NeuralLayer& layer = layers[i];
         int yOffset = -(layer.neurons - 1) * ySpacing / 2;
 
-        // 🔹 层前缀标识
+        //层前缀标识
         QString prefix;
         if (i == 0) prefix = "I";
         else if (i == layers.size() - 1) prefix = "O";
         else prefix = "H";
 
-        // 🔹 添加层标签文本
+        // 层标签文本
         QString label = QString("%1\n(%2)").arg(layer.layerType).arg(layer.activationFunction);
         QGraphicsTextItem* layerLabel = m_scene->addText(label);
         layerLabel->setDefaultTextColor(Qt::darkBlue);
         layerLabel->setPos(i * xSpacing - 30, yOffset - 60);
 
-        // 🔹 添加神经元
+        // 神经元
         for (int j = 0; j < layer.neurons; ++j) {
             NeuronItem* neuron = new NeuronItem(QString("%1%2").arg(prefix).arg(j + 1));
             neuron->updateColors();
@@ -205,11 +205,11 @@ void NetworkVisualizer::createNetwork(const QList<NeuralLayer>& layers) {
             layerNeurons.append(neuron);
         }
 
-        allNeurons.append(layerNeurons);// 改为存储到成员变量
+        allNeurons.append(layerNeurons);// 存储到成员变量
         m_allNeurons = allNeurons;
     }
 
-    // 🔹 添加连接线
+    // 连接线
     for (int i = 0; i < allNeurons.size() - 1; ++i) {
         for (NeuronItem* from : allNeurons[i]) {
             for (NeuronItem* to : allNeurons[i + 1]) {
@@ -248,7 +248,6 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
     }
 
     // 连接线
-    // 修改 createblockNetwork 中的连接线创建
     for (int i = 0; i < layerGroups.size() - 1; ++i) {
         auto from = layerGroups[i];
         auto to = layerGroups[i + 1];
@@ -278,16 +277,16 @@ void NetworkVisualizer::applyColorTheme(const QString& themeName) {
         ColorThemeManager::setCurrentTheme(themeName);
         const ColorTheme& theme = ColorThemeManager::currentTheme();
 
-        // 1. 更新层组颜色（合并为单次遍历）
+        // 更新层组颜色
         for (QGraphicsItemGroup* group : m_layerGroups) {
             for (QGraphicsItem* item : group->childItems()) {
                 if (auto* rect = dynamic_cast<QGraphicsRectItem*>(item)) {
-                    // 层背景框
+                    // 层背景
                     if (rect->rect().width() == 160 && rect->rect().height() == 130) {
                         rect->setBrush(theme.layerBackground);
                         rect->setPen(QPen(theme.neuronBorder, 1));
                     }
-                    // 权重/偏置框
+                    // 权重/偏置
                     else if (rect->rect().width() == 30 && rect->rect().height() == 30) {
                         rect->setBrush(theme.weightBoxFill);
                     }
@@ -296,21 +295,21 @@ void NetworkVisualizer::applyColorTheme(const QString& themeName) {
                         rect->setBrush(theme.activationBoxFill);
                     }
                 }
-                // 文本颜色
+                // text颜色
                 else if (auto* text = dynamic_cast<QGraphicsTextItem*>(item)) {
                     text->setDefaultTextColor(theme.text);
                 }
             }
         }
 
-        // 2. 更新神经元颜色
+        // 神经元颜色
         for (auto& layer : m_allNeurons) {
             for (NeuronItem* neuron : layer) {
                 neuron->updateColors();
             }
         }
 
-        // 3. 更新连接线颜色
+        // 更新连接线
         for (QGraphicsItem* item : scene()->items()) {
             if (auto* conn = dynamic_cast<ConnectionItem*>(item)) {
                 conn->updateColor();
@@ -318,31 +317,7 @@ void NetworkVisualizer::applyColorTheme(const QString& themeName) {
         }
     }
 
-/*
 
-void NetworkVisualizer::mouseMoveEvent(QMouseEvent* event) {
-    if (m_dragItem) {
-        QPointF pos = event->pos();
-        QPointF delta = pos - m_dragStartPos;
-        m_dragItem->setPos(m_dragItem->pos() + delta);
-        m_dragStartPos = pos;
-    }
-    QGraphicsView::mouseMoveEvent(event);
-}
-
-void NetworkVisualizer::mousePressEvent(QMouseEvent* event) {
-    QGraphicsItem* item = itemAt(event->pos());
-    if (item) {
-        m_dragItem = item;
-        m_dragStartPos = event->pos();
-        QMimeData* mimeData = new QMimeData();
-        mimeData->setData("application/x-layer", item->data(0).toByteArray());
-        QDrag* drag = new QDrag(this);
-        drag->setMimeData(mimeData);
-        drag->exec();
-    }
-    QGraphicsView::mousePressEvent(event);
-}*/
 
 void NetworkVisualizer::dragMoveEvent(QDragMoveEvent* event) {
     if (event->mimeData()->hasFormat("application/x-layer")) {
@@ -355,7 +330,7 @@ void NetworkVisualizer::dropEvent(QDropEvent* event) {
         QByteArray data = event->mimeData()->data("application/x-layer");
         NeuralLayer layer = qvariant_cast<NeuralLayer>(QVariant::fromValue(data));
 
-        // 根据层类型设置不同颜色和形状
+        // 根据层类型设颜色和形状
         QColor color;
         if (layer.layerType == "Input") color = Qt::cyan;
         else if (layer.layerType == "Hidden") color = Qt::yellow;
