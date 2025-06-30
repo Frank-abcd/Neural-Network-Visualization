@@ -45,7 +45,6 @@ void NetworkVisualizer::createConnection(MovableLayerGroup* from, MovableLayerGr
     m_connections.append({line, from, to});
 }
 
-
 MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
     const NeuralLayer& layer,
 
@@ -186,7 +185,7 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
 
     }
 
-    if (!activation.trimmed().isEmpty()) {
+    if (!activation.trimmed().isEmpty()&&(layerName == "Hidden"||layerName == "Dense")) {
         act = new QGraphicsRectItem(0, 0, 100, 26);
         act->setBrush(theme.activationBoxFill);//QColor(180, 220, 255)
         act->setPos(30, 90);
