@@ -802,7 +802,7 @@ void MainWindow::applyTheme(const QString& theme)
                         );
 
     setupIconButton(ui->userGuide, ":/Icon/user-"+theme+".png");
-    setupIconButton(ui->pageColor, ":/Icon/user-"+theme+".png");
+    setupIconButton(ui->pageColor, ":/Icon/theme-"+theme+".png");
     setupIconButton(ui->neuralTheme, ":/Icon/color-"+theme+".png");
     setupIconButton(ui->selectMode, ":/Icon/mode-"+theme+".png");
     setupIconButton(ui->generateCode, ":/Icon/code-"+theme+".png");
