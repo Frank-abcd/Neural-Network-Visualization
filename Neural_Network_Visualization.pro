@@ -1,8 +1,11 @@
 QT       += core gui
+QT += widgets
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -11,28 +14,55 @@ CONFIG += c++17
 SOURCES += \
     backend.cpp \
     codegenerator.cpp \
+    codegeneratorwindow.cpp \
+    colorthememanager.cpp \
+    connectionitem.cpp \
     json_utils.cpp \
+    layerblockitem.cpp \
     layeritem.cpp \
     main.cpp \
     mainwindow.cpp \
+    matrial.cpp \
+    movablelayergroup.cpp \
     networkvisualizer.cpp \
     neuronitem.cpp \
-    programfragmentprocessor.cpp
+    programfragmentprocessor.cpp \
+    propertypanel.cpp \
+    resourcepage.cpp
 
 HEADERS += \
     backend.h \
     codegenerator.h \
+    codegeneratorwindow.h \
+    colorthememanager.h \
+    colorthememanager.h \
+    connectionitem.h \
     json_utils.h \
+    layerblockitem.h \
     layeritem.h \
     mainwindow.h \
+    matrial.h \
+    movablelayergroup.h \
     networkvisualizer.h \
     neuronitem.h \
-    programfragmentprocessor.h
+    programfragmentprocessor.h \
+    propertypanel.h \
+    resourcepage.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    codegeneratorwindow.ui \
+    matrial.ui
+
+RESOURCES += resource.qrc
+
+CONFIG += lrelease
+CONFIG += embed_translations
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+
+DISTFILES +=*/

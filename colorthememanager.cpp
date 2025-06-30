@@ -1,4 +1,3 @@
-// colorthememanager.cpp
 #include "colorthememanager.h"
 #include <qcolor.h>
 
@@ -28,3 +27,7 @@ void ColorThemeManager::setCurrentTheme(const QString& themeName) {
         s_currentTheme = themeName;
     }
 }
+QString ColorThemeManager::getCurrentTheme() {
+    return s_currentTheme;
+}
+
