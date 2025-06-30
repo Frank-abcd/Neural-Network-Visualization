@@ -46,6 +46,7 @@ public:
     QVector<bool> historySaved;
     QVector<QString> historyLabel;
     bool imageGenerate;
+    int position;
 
 private:
     Ui::MainWindow *ui;
