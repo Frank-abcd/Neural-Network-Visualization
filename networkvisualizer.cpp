@@ -385,6 +385,7 @@ void NetworkVisualizer::createConnection(MovableLayerGroup* from, MovableLayerGr
 }
 
 
+
 MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
     const NeuralLayer& layer,
 
@@ -458,6 +459,54 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
 
     }
 
+    if (layerName== "LSTM" || layerName == "RNN" || layerName == "GRU"){
+        QGraphicsRectItem* act = new QGraphicsRectItem(0, 0, 100, 26);
+        act->setBrush(theme.activationBoxFill);
+        act->setPos(30, 90);
+        group->addToGroup(act);
+
+        // 标签文本
+        QString dropoutText = QString("units: %1").arg(layer.units);
+        QGraphicsTextItem* actLabel = new QGraphicsTextItem(dropoutText, act);
+        actLabel->setPos(10, 5);
+
+        // 动态计算文本宽度调整矩形框大小
+        QFontMetrics metrics(actLabel->font());
+        int textWidth = metrics.horizontalAdvance(dropoutText);  // 获取文本像素宽度
+        act->setRect(0, 0, textWidth + 20, 26);
+    }
+
+    if (layerName == "Convolutional"){
+
+        QGraphicsRectItem* filtersRect = new QGraphicsRectItem(0, 0, 100, 26);
+        filtersRect->setBrush(theme.activationBoxFill);
+        filtersRect->setPos(30, 60);
+        group->addToGroup(filtersRect);
+
+        QGraphicsRectItem* kernelRect = new QGraphicsRectItem(0, 0, 100, 26);
+        kernelRect->setBrush(theme.activationBoxFill);
+        kernelRect->setPos(30, 90);  // 放在filters下方
+        group->addToGroup(kernelRect);
+        // 标签文本
+        QString filtersText = QString("filters: %1").arg(layer.filters);
+        QGraphicsTextItem* filtersLabel = new QGraphicsTextItem(filtersText, filtersRect);
+        filtersLabel->setPos(10, 5);
+
+
+        QString kernelText = QString("kernel: %1").arg(layer.kernelSize);
+        QGraphicsTextItem* kernelLabel = new QGraphicsTextItem(kernelText, kernelRect);
+        kernelLabel->setPos(10, 5);
+
+        // 动态计算文本宽度调整矩形框大小
+        QFontMetrics metrics(filtersLabel->font());
+        int filtersWidth = metrics.horizontalAdvance(filtersText) + 20;
+        filtersRect->setRect(0, 0, filtersWidth, 26);
+
+
+        int kernelWidth = metrics.horizontalAdvance(kernelText) + 20;
+        kernelRect->setRect(0, 0, kernelWidth, 26);
+    }
+
     if (layerName== "MaxPooling" || layerName == "AveragePooling")  {
         //pooling层框
         QGraphicsRectItem* act = new QGraphicsRectItem(0, 0, 100, 26);
@@ -477,7 +526,7 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
 
     }
 
-    if (!activation.trimmed().isEmpty()) {
+    if (!activation.trimmed().isEmpty()&&(layerName == "Hidden"||layerName == "Dense")) {
         act = new QGraphicsRectItem(0, 0, 100, 26);
         act->setBrush(theme.activationBoxFill);//QColor(180, 220, 255)
         act->setPos(30, 90);
@@ -532,6 +581,7 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
 
     return group;
 }
+
 
 void NetworkVisualizer::createNetwork(const QList<NeuralLayer>& layers) {
     m_scene->clear();
