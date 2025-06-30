@@ -268,6 +268,37 @@ void MainWindow::on_history_clicked()
         }
     });
 
+    // 删除按钮
+    QPushButton* deleteBtn = new QPushButton("删除记录");
+    layout->addWidget(deleteBtn);
+
+    connect(deleteBtn, &QPushButton::clicked, this, [=]() {
+        QListWidgetItem* item = list->currentItem();
+        if (!item) return;
+
+        QString timestamp = item->data(Qt::UserRole).toString();
+
+        // 从文件中删除
+        QFile file("history.json");
+        if (file.open(QIODevice::ReadOnly)) {
+            QJsonArray history = QJsonDocument::fromJson(file.readAll()).array();
+            file.close();
+
+            QJsonArray newHistory;
+            for (const QJsonValue& val : history) {
+                if (val.toObject()["timestamp"].toString() != timestamp) {
+                    newHistory.append(val);
+                }
+            }
+
+            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+                file.write(QJsonDocument(newHistory).toJson());
+                file.close();
+                delete list->takeItem(list->currentRow());
+            }
+        }
+    });
+
     dialog->setLayout(layout);
     dialog->resize(400, 300);
     dialog->exec();
