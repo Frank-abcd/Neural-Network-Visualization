@@ -9,6 +9,7 @@
 #include <QDropEvent>
 #include <QGraphicsRectItem>
 #include "colorthememanager.h"
+#include "movablelayergroup.h"
 
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
     : QGraphicsView(parent), m_scene(new QGraphicsScene(this)) {
@@ -17,23 +18,45 @@ NetworkVisualizer::NetworkVisualizer(QWidget* parent)
     setDragMode(QGraphicsView::RubberBandDrag);
     setAcceptDrops(true); // 启用拖拽功能
 }
+void NetworkVisualizer::updateConnections() {
+    qDebug() << "Updating connections";
+    for (const ConnectionLine& conn : m_connections) {
+        if (!conn.fromGroup || !conn.toGroup || !conn.line) continue;
+/*
+        QPointF p1 = conn.fromGroup->sceneBoundingRect().center();
+        p1.setY(conn.fromGroup->sceneBoundingRect().bottom());
 
-QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
+        QPointF p2 = conn.toGroup->sceneBoundingRect().center();
+        p2.setY(conn.toGroup->sceneBoundingRect().top());*/
+        QPointF p1 = conn.fromGroup->mapToScene(
+            conn.fromGroup->boundingRect().center().x(),
+            conn.fromGroup->boundingRect().bottom()
+            );
+        QPointF p2 = conn.toGroup->mapToScene(
+            conn.toGroup->boundingRect().center().x(),
+            conn.toGroup->boundingRect().top()
+            );
+
+        conn.line->setLine(QLineF(p1, p2));
+    }
+}
+
+
+MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
     const NeuralLayer& layer,
 
     int yPos
     ) {
     const QString layerName = QString("%1").arg(layer.layerType);
     const QString activation= QString("%1").arg(layer.activationFunction);
-    if (layerName=="Dropout"){
-
-
-    }
     const int width = 160;
     const int height = 130;
     const int x = 100;
     const ColorTheme& theme = ColorThemeManager::currentTheme();
-    QGraphicsItemGroup* group = new QGraphicsItemGroup();
+    //QGraphicsItemGroup* group = new QGraphicsItemGroup();
+    MovableLayerGroup* group = new MovableLayerGroup();
+    connect(group, &MovableLayerGroup::positionChanged, this, &NetworkVisualizer::updateConnections);
+
 
     // 背景框
     QGraphicsRectItem* bg = new QGraphicsRectItem(0, 0, width, height);
@@ -207,20 +230,25 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
     m_layerGroups.clear();
 
     const int layerSpacing = 150;
-    QList<QGraphicsItemGroup*> layerGroups;
+    //QList<QGraphicsItemGroup*> layerGroups;
+    QList<MovableLayerGroup*> layerGroups;
+
 
     for (int i = 0; i < layers.size(); ++i) {
         const NeuralLayer& layer = layers[i];
-
+        MovableLayerGroup* group = createDetailedLayer(layer, 20 + i * layerSpacing);
+        layerGroups.append(group);
+        /*
         QGraphicsItemGroup* group = createDetailedLayer(
             layer,
             20 + i * layerSpacing
             );
-        layerGroups.append(group);
+        layerGroups.append(group);*/
         m_layerGroups.append(group);
     }
 
     // 连接线
+    // 修改 createblockNetwork 中的连接线创建
     for (int i = 0; i < layerGroups.size() - 1; ++i) {
         auto from = layerGroups[i];
         auto to = layerGroups[i + 1];
@@ -231,11 +259,21 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
         QPointF p2 = to->sceneBoundingRect().center();
         p2.setY(to->sceneBoundingRect().top());
 
-        m_scene->addLine(QLineF(p1, p2), QPen(Qt::black));
-    }
+        QGraphicsLineItem* line = m_scene->addLine(QLineF(p1, p2), QPen(Qt::black));
+        m_connections.append({line, from, to});
 
+        // 连接信号 - 现在类型匹配了
+        connect(from, &MovableLayerGroup::positionChanged,
+                this, &NetworkVisualizer::updateConnections);
+        connect(to, &MovableLayerGroup::positionChanged,
+                this, &NetworkVisualizer::updateConnections);
+    }
 }
-// networkvisualizer.cpp
+
+
+
+
+
 void NetworkVisualizer::applyColorTheme(const QString& themeName) {
         ColorThemeManager::setCurrentTheme(themeName);
         const ColorTheme& theme = ColorThemeManager::currentTheme();

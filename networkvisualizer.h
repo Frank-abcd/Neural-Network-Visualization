@@ -2,6 +2,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include "neuronitem.h"
+#include "movablelayergroup.h"
 #include "connectionitem.h"
 #include "backend.h"
 #include <QGraphicsScene>
@@ -28,7 +29,8 @@ public:
     //void createNetwork(const QJsonArray& layersJson);
     void createblockNetwork(const QList<NeuralLayer>& layers);
     void applyColorTheme(const QString& themeName);
-    QGraphicsItemGroup* createDetailedLayer(const NeuralLayer& layer , int yPos);
+    //QGraphicsItemGroup* createDetailedLayer(const NeuralLayer& layer , int yPos);
+    MovableLayerGroup* createDetailedLayer(const NeuralLayer& layer , int yPos);
 
 protected:
     //void mousePressEvent(QMouseEvent* event) override;
@@ -45,4 +47,14 @@ private:
     QPointF m_dragStartPos;
      QVector<QVector<NeuronItem*>> m_allNeurons; // 存储神经元指针以便更新
     QList<QGraphicsItemGroup*> m_layerGroups;
+    struct ConnectionLine {
+         QGraphicsLineItem* line;
+         QGraphicsItemGroup* fromGroup;
+         QGraphicsItemGroup* toGroup;
+    };
+
+    QList<ConnectionLine> m_connections;
+private slots:
+    void updateConnections();
+
 };
