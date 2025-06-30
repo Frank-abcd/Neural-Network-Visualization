@@ -23,6 +23,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     matrial.cpp\
+    movablelayergroup.cpp \
     networkvisualizer.cpp \
     neuronitem.cpp \
     programfragmentprocessor.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     layeritem.h \
     mainwindow.h \
     matrial.h\
+    movablelayergroup.h \
     networkvisualizer.h \
     neuronitem.h \
     programfragmentprocessor.h \
