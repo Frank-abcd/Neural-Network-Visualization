@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
     ui->previous->setToolTip("返回上一步");
-    ui->turnback->setToolTip("前进到下一步");
+    ui->turnback->setToolTip("展示网络图片");
     ui->save->setToolTip("保存当前神经网络结构");
 
     QMenu* themeMenu = new QMenu("切换主题", this);
