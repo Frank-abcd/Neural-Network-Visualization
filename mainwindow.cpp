@@ -5,7 +5,6 @@
 #include "propertypanel.h"
 #include "networkvisualizer.h"
 #include "matrial.h"
-#include "resourcepage.h"
 #include <QIcon>
 #include <QPushButton>
 #include <QJsonDocument>
@@ -55,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
     applyTheme("blue");
     original=0;
 
+    imageGenerate=0;
+
     setWindowTitle("CodeWings:Neural-Network-Visualization");
 
     setBackground(":/Icon/background.jpg");
@@ -91,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
     ui->previous->setToolTip("返回上一步");
-    ui->turnback->setToolTip("前进到下一步");
+    ui->turnback->setToolTip("展示网络图片");
     ui->save->setToolTip("保存当前神经网络结构");
 
     QMenu* themeMenu = new QMenu("切换主题", this);
@@ -173,6 +174,7 @@ void MainWindow::on_user_clicked()
 void MainWindow::on_mode_clicked()
 {
     qDebug() << "mode 按钮点击了";
+
 }
 
 void MainWindow::on_generate_code_clicked()
@@ -183,6 +185,8 @@ void MainWindow::on_generate_code_clicked()
 
     this->hide();              // 隐藏主界面
     codeWin->show();           // 显示弹窗
+
+    imageGenerate = 0;
 }
 
 void MainWindow::on_generate_image_clicked()
@@ -192,7 +196,20 @@ void MainWindow::on_generate_image_clicked()
         return;
     }
 
+    historySaved.push_back(false);
     QJsonArray structure = codeWin->getNetworkAsJson();
+    historyCache.push_back(structure);
+    QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+    QString modeLabel = "Undefined";
+    if (currentMode == "BlockGenerate"){
+        modeLabel = "Block";
+    }
+    else if (currentMode == "NeuronitemGenerate"){
+        modeLabel = "Neuronitem";
+    }
+    QString label = QString("%1 | %2").arg(timestamp) .arg(modeLabel);
+    historyLabel.push_back(label);
+
     QList<NeuralLayer> layers;
     for (const QJsonValue& val : structure) {
         if (val.isObject()) {
@@ -222,183 +239,150 @@ void MainWindow::on_generate_image_clicked()
     else{
         showWarningMessage("请选择神经网络图像模式");
     }
+
+    imageGenerate=1;
 }
 
 void MainWindow::on_history_clicked()
 {
     QDialog* dialog = new QDialog(this);
     dialog->setWindowTitle("历史记录");
+    dialog->setMinimumSize(400, 300);
+
     QVBoxLayout* layout = new QVBoxLayout(dialog);
     QListWidget* list = new QListWidget(dialog);
 
-    QFile file("history.json");
-    if (file.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-        if (doc.isArray()) {
-            QJsonArray history = doc.array();
-            for (const QJsonValue& val : history) {
-                QString ts = val.toObject()["timestamp"].toString();
-                QString mode = val.toObject()["mode"].toString();
-                list->addItem(ts + " - " + mode);
-            }
+    // 添加历史记录条目
+    int cnt = 0;
+    for (int i = 0; i < historyCache.size(); ++i) {
+        if (historySaved[i]){
+            cnt += 1;
+            QString label = QString("记录 %1 | ").arg(cnt) + historyLabel[i];
+            list->addItem(label);
         }
     }
+
     layout->addWidget(list);
 
     // 加载按钮
     QPushButton* loadBtn = new QPushButton("加载选中记录");
     layout->addWidget(loadBtn);
+    dialog->setLayout(layout);
 
+    // 连接加载逻辑
     connect(loadBtn, &QPushButton::clicked, this, [=]() {
         int index = list->currentRow();
-        if (index < 0) return;
+        if (index < 0 || index >= historyCache.size()) return;
 
-        // 加载选中记录
-        QFile file("history.json");
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonArray history = QJsonDocument::fromJson(file.readAll()).array();
-            QJsonObject selected = history[index].toObject()["network"].toObject();
-            // QJsonArray layers = selected["layers"].toArray();
-
-            QString recordKey=selected["timestamp"].toString();
-            onHistoryRecordClicked(recordKey);
-            //loadNetworkFromJson(layers);  // 你写的载入函数
-            //showFloatingMessage("已载入历史记录！");
-            dialog->accept();
+        if (!historySaved[index]) {
+            QMessageBox::StandardButton reply = QMessageBox::question(
+                this,
+                "未保存更改",
+                "当前记录尚未保存，是否仍要加载？",
+                QMessageBox::Yes | QMessageBox::No
+                );
+            if (reply == QMessageBox::No) return;
         }
-    });
 
-    // 删除按钮
-    QPushButton* deleteBtn = new QPushButton("删除记录");
-    layout->addWidget(deleteBtn);
-
-    connect(deleteBtn, &QPushButton::clicked, this, [=]() {
-        QListWidgetItem* item = list->currentItem();
-        if (!item) return;
-
-        QString timestamp = item->data(Qt::UserRole).toString();
-
-        // 从文件中删除
-        QFile file("history.json");
-        if (file.open(QIODevice::ReadOnly)) {
-            QJsonArray history = QJsonDocument::fromJson(file.readAll()).array();
-            file.close();
-
-            QJsonArray newHistory;
-            for (const QJsonValue& val : history) {
-                if (val.toObject()["timestamp"].toString() != timestamp) {
-                    newHistory.append(val);
-                }
-            }
-
-            if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-                file.write(QJsonDocument(newHistory).toJson());
-                file.close();
-                delete list->takeItem(list->currentRow());
+        const QJsonArray& layers = historyCache[index];
+        QList<NeuralLayer> parsedLayers;
+        for (const QJsonValue& val : layers) {
+            if (val.isObject()) {
+                parsedLayers.append(NeuralLayer::fromJsonObject(val.toObject()));
             }
         }
+
+        // 可视化加载
+        NetworkVisualizer* visualizer = new NetworkVisualizer(this);
+        visualizer->setMinimumSize(600, 400);
+        QString theme = ColorThemeManager::getCurrentTheme();
+        ColorThemeManager::setCurrentTheme(theme);
+
+        if (currentMode == "BlockGenerate") {
+            visualizer->createblockNetwork(parsedLayers);
+        } else if (currentMode == "NeuronitemGenerate") {
+            visualizer->createNetwork(parsedLayers);
+        } else {
+            showWarningMessage("请选择神经网络图像模式！");
+            delete visualizer;
+            return;
+        }
+
+        ui->scrollAreavisualizer->setWidget(visualizer);
+        showFloatingMessage("✅ 已加载历史记录");
+
+        dialog->accept();  // 关闭弹窗
     });
 
-    dialog->setLayout(layout);
-    dialog->resize(400, 300);
     dialog->exec();
 }
 
-void MainWindow::onHistoryRecordClicked(const QString& recordKey)
-{
-    // 1. 如果当前结构未保存，弹出确认对话框
-    if (!currentNetworkSaved && codeWin) {
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            this,
-            "未保存更改",
-            "当前网络结构尚未保存，是否继续查看所选历史记录？\n继续将丢弃当前修改。",
-            QMessageBox::Yes | QMessageBox::No
-            );
-
-        if (reply == QMessageBox::No) {
-            showFloatingMessage("已取消加载历史记录");
-            return;  // 返回当前记录，不做任何操作
-        }
-    }
-
-    // 2. 用户确认继续后，加载选中记录
-    // QJsonArray data = loadHistoryByKey(recordKey);
-    // showNetworkVisualization(data);
-    // showFloatingMessage("✅ 已加载历史记录：" + recordKey);
-
-    // 搞不懂这段为什么不能正常加载出历史网络
-    QJsonArray structure = loadHistoryByKey(recordKey);
+void MainWindow::onHistoryRecordClicked(int index){
+    const QJsonArray& structure = historyCache[index];
     QList<NeuralLayer> layers;
     for (const QJsonValue& val : structure) {
         if (val.isObject()) {
             layers.append(NeuralLayer::fromJsonObject(val.toObject()));
         }
     }
-    NetworkVisualizer* visualizer = new NetworkVisualizer();
-    QString theme = ColorThemeManager::getCurrentTheme();  // 获取当前主题
+
+    // 创建 NetworkVisualizer 组件并展示
+    NetworkVisualizer* visualizer = new NetworkVisualizer(this);
+    visualizer->setMinimumSize(600, 400);  // 可调节尺寸
+
+    // 设置主题（如有）
+    QString theme = ColorThemeManager::getCurrentTheme();
     ColorThemeManager::setCurrentTheme(theme);
-    if (currentMode=="BlockGenerate"){
+
+    if (currentMode == "BlockGenerate") {
         visualizer->createblockNetwork(layers);
-        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
         ui->scrollAreavisualizer->setWidget(visualizer);
-    }
-    else if (currentMode=="NeuronitemGenerate"){
+    } else if (currentMode == "NeuronitemGenerate") {
         visualizer->createNetwork(layers);
-        visualizer->show();// 你来实现这个函数，基于 structure 展示图像
         ui->scrollAreavisualizer->setWidget(visualizer);
-    }
-    else{
-        showWarningMessage("请选择神经网络图像模式");
-    }
-}
-
-QJsonArray MainWindow::loadHistoryByKey(const QString& key)
-{
-    QFile file("history.json");
-    if (!file.open(QIODevice::ReadOnly)) return {};
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    return doc.object().value(key).toArray();
-}
-
-void MainWindow::showNetworkVisualization(const QJsonArray& layers)
-{
-    // 1. 清空预览区域
-    QLayout* layout = ui->previewArea->layout();
-    if (!layout) {
-        layout = new QVBoxLayout(ui->previewArea);
-        ui->previewArea->setLayout(layout);
-    }
-    QLayoutItem* item;
-    while ((item = layout->takeAt(0)) != nullptr) {
-        if (item->widget()) delete item->widget();
-        delete item;
+    } else {
+        delete visualizer;
+        showWarningMessage("❗ 当前未选择图像模式，请先设置图像生成模式！");
+        return;
     }
 
-    // 2. 创建 NetworkVisualizer 实例（或重用）
-    if (!visualizer) {
-        visualizer = new NetworkVisualizer(this);  // 你已定义的绘图类
-    }
-
-    // visualizer->createNetwork(layers);  // 设置图数据并触发更新
-    layout->addWidget(visualizer);
+    showFloatingMessage(QString("✅ 已加载历史记录：%1").arg(historyLabel[index]));
 }
 
 void MainWindow::on_start_new_clicked()
 {
     // 1. 弹出确认对话框
-    QMessageBox::StandardButton reply = QMessageBox::question(
-        this,
-        "开始新的神经网络",
-        "当前网络结构尚未保存。\n是否继续？继续将清空当前结构。",
-        QMessageBox::Yes | QMessageBox::No
-        );
+    if (!currentNetworkSaved){
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "开始新的神经网络",
+            "当前网络结构尚未保存。\n是否继续？继续将清空当前结构。",
+            QMessageBox::Yes | QMessageBox::No
+            );
 
-    if (reply == QMessageBox::No) {
-        return;
+        if (reply == QMessageBox::No) {
+            return;
+        }
+
+        if (!codeWin) {
+            return;
+        }
     }
+    else{
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "开始新的神经网络",
+            "当前网络结构已保存。\n是否继续？继续将清空当前结构。",
+            QMessageBox::Yes | QMessageBox::No
+            );
 
-    if (!codeWin) {
-        return;
+        if (reply == QMessageBox::No) {
+            return;
+        }
+
+        if (!codeWin) {
+            return;
+        }
     }
 
     // 2. 确认清空神经网络结构及图像
@@ -424,31 +408,14 @@ void MainWindow::on_start_new_clicked()
     showFloatingMessage("已清空网络结构，开始新的构建");
 }
 
-
 void MainWindow::on_previous_clicked()
 {
-    // 使用堆栈分配而不是成员变量
-    ResourcePage *resourcePage = new ResourcePage();
-    resourcePage->setAttribute(Qt::WA_DeleteOnClose); // 确保关闭时自动删除
 
-    connect(resourcePage, &ResourcePage::returnToMain, this, [this, resourcePage]() {
-        this->show();
-        resourcePage->close(); // 确保关闭资源页面
-    });
-
-    //this->hide();
-    resourcePage->show();
-}
-
-void MainWindow::onReturnFromResource()
-{
-    resourcePage->hide();
-    this->show();
 }
 
 void MainWindow::on_toolButton_clicked()
 {
-    return;
+
 }
 
 void MainWindow::on_turnback_clicked()
@@ -457,9 +424,27 @@ void MainWindow::on_turnback_clicked()
     matrialwindow->show();
 }
 
-void MainWindow::on_save_clicked()
-{
-    QJsonArray layersArray = getCurrentNetworkAsJson();
+void MainWindow::on_save_clicked(){
+    if (!imageGenerate){
+        historySaved.push_back(false);
+        QJsonArray structure = codeWin->getNetworkAsJson();
+        historyCache.push_back(structure);
+        QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+        QString modeLabel = "Undefined";
+        if (currentMode == "BlockGenerate"){
+            modeLabel = "Block";
+        }
+        else if (currentMode == "NeuronitemGenerate"){
+            modeLabel = "Neuronitem";
+        }
+        QString label = QString("%1 | %2").arg(timestamp) .arg(modeLabel);
+        historyLabel.push_back(label);
+    }
+    *(historySaved.rbegin())=true;
+
+    showSaveProgressBarMessage();
+
+    QJsonArray layersArray = codeWin->getNetworkAsJson();
     QJsonObject entry;
     entry["timestamp"] = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
     entry["mode"] = currentMode;
@@ -482,9 +467,7 @@ void MainWindow::on_save_clicked()
     }
 
     currentNetworkSaved=1;
-    showSaveProgressBarMessage();
 }
-
 
 void MainWindow::handleJsonData(const QString &jsonStr) {
     QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
@@ -546,43 +529,6 @@ void MainWindow::showFloatingMessage(const QString& text)
     connect(group, &QPropertyAnimation::finished, label, &QLabel::deleteLater);
 }
 
-QJsonArray MainWindow::getCurrentNetworkAsJson()
-{
-    QJsonArray layerArray;
-
-    for (QGraphicsItem* item : scene->items()) {
-        // 筛选我们添加的图层（跳过辅助线等）
-        if (QGraphicsRectItem* rect = qgraphicsitem_cast<QGraphicsRectItem*>(item)) {
-            QVariant data = rect->data(0);  // 通常第 0 位是层数据
-
-            if (data.canConvert<QVariantMap>()) {
-                QVariantMap layerData = data.toMap();
-
-                QJsonObject layerObj;
-                layerObj["layerType"] = layerData["layerType"].toString();
-
-                // 保存位置信息
-                QPointF pos = rect->pos();
-                layerObj["x"] = int(pos.x());
-                layerObj["y"] = int(pos.y());
-
-                // 保存参数（如 neurons/activation）
-                QJsonObject paramsObj;
-                for (const QString& key : layerData.keys()) {
-                    if (key != "layerType") {
-                        paramsObj[key] = layerData[key].toString();
-                    }
-                }
-
-                layerObj["params"] = paramsObj;
-                layerArray.append(layerObj);
-            }
-        }
-    }
-
-    return layerArray;
-}
-
 void MainWindow::showSaveProgressBarMessage()
 {
     QWidget* popup = new QWidget(this);
@@ -634,46 +580,6 @@ void MainWindow::showSaveProgressBarMessage()
         }
     });
     timer->start(interval);
-}
-
-void MainWindow::loadNetworkFromJson(const QJsonArray& layers)
-{
-    showWarningMessage("调取该历史记录将会覆盖当前图层⚠️请先保存");
-    scene->clear();
-
-    for (const QJsonValue& value : layers) {
-        QJsonObject obj = value.toObject();
-
-        QString layerType = obj["layerType"].toString();
-        int x = obj["x"].toInt();
-        int y = obj["y"].toInt();
-
-        QMap<QString, QString> params;
-        QJsonObject paramObj = obj["params"].toObject();
-        for (const QString& key : paramObj.keys()) {
-            params[key] = paramObj[key].toString();
-        }
-
-        QGraphicsRectItem* item = new QGraphicsRectItem(0, 0, 100, 50);
-        item->setPos(x, y);
-
-        QColor color = Qt::gray;
-        if (layerType == "Dense") color = Qt::yellow;
-        else if (layerType == "Conv2D") color = Qt::blue;
-        else if (layerType == "Dropout") color = Qt::darkGray;
-        item->setBrush(color);
-
-        QVariantMap data;
-        data["layerType"] = layerType;
-        for (const QString& key : params.keys()) {
-            data[key] = params[key];
-        }
-        item->setData(0, data);
-
-        scene->addItem(item);
-    }
-
-    showFloatingMessage("✅ 网络结构已成功恢复！");
 }
 
 void MainWindow::showWarningMessage(const QString& text)
@@ -877,7 +783,6 @@ void MainWindow::applyTheme(const QString& theme)
 MainWindow::~MainWindow()
 {
     delete ui;
-    //delete resourcePage;
 }
 // 静态成员定义
 MainWindow* MainWindow::s_instance = nullptr;
