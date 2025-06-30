@@ -14,7 +14,7 @@ public:
     int neurons = 1000;//神经元数量
     int inputSize = 128;//输入维度
     QString activationFunction = "relu";//激活函数
-    //指向图形项的指针
+    // 新增：指向图形项的指针
     QGraphicsItem* graphicsItem = nullptr;
 
     NeuralLayer();

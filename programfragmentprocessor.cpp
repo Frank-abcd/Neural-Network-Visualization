@@ -99,7 +99,7 @@ QJsonObject ProgramFragmentProcessor::validateCode(const QString& code) {
     validationResult["valid"] = true;
     QJsonArray errors;
 
-    // 基本语法检查
+    // 1. 基本语法检查
     if (code.trimmed().isEmpty()) {
         errors.append("代码不能为空");
         validationResult["valid"] = false;
@@ -107,7 +107,7 @@ QJsonObject ProgramFragmentProcessor::validateCode(const QString& code) {
         return validationResult;
     }
 
-    // 检查Python缩进错误 (简单检查：每行缩进必须是4的倍数)
+    // 2. 检查Python缩进错误 (简单检查：每行缩进必须是4的倍数)
     QStringList lines = code.split('\n');
     QRegularExpression indentRegex("^(\\s*)");
 
@@ -139,9 +139,9 @@ QJsonObject ProgramFragmentProcessor::validateCode(const QString& code) {
         }
     }
 
-    // 检查常见的PyTorch相关错误
+    // 3. 检查常见的PyTorch相关错误
     if (code.contains("nn.") || code.contains("torch.")) {
-        // 检查块引用错误
+        // 检查常见的PyTorch模块引用错误
         if (!code.contains("import torch") && !code.contains("import torch.nn")) {
             errors.append("使用PyTorch模块但未导入torch或torch.nn");
             validationResult["valid"] = false;

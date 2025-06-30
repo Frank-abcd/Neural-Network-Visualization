@@ -29,3 +29,4 @@ private:
     static const QMap<QString, ColorTheme> s_themes;
 };
 #endif // COLORTHEMEMANAGER_H
+

@@ -5,7 +5,7 @@
 PropertyPanel::PropertyPanel(QWidget *parent) : QWidget(parent)
 {
     layout = new QFormLayout(this);
-    updateBtn = new QPushButton("update parameters", this);
+    updateBtn = new QPushButton("更新参数", this);
     layout->addWidget(updateBtn);
     layout->setSpacing(15);
 
@@ -17,6 +17,22 @@ void PropertyPanel::setLayerType(const QString& type)
     currentLayerType = type;
 }
 
+// void PropertyPanel::setParameters(const QMap<QString, QString>& params) {
+//     // 完全清除所有旧参数输入框（包括行）
+//     for (auto& widget : fieldMap) {
+//         layout->removeWidget(widget);
+//         delete widget;
+//     }
+//     fieldMap.clear();
+
+//     // 创建新的输入框
+//     for (auto it = params.begin(); it != params.end(); ++it) {
+//         QLineEdit* lineEdit = new QLineEdit(it.value(), this);
+//         layout->insertRow(layout->rowCount() - 1, it.key(), lineEdit);
+//         fieldMap[it.key()] = lineEdit;
+//     }
+// }
+// propertypanel.cpp
 void PropertyPanel::setParameters(const QMap<QString, QString>& params) {
     // 完全清除所有旧参数行（包括标签和输入框）
     QLayoutItem* child;

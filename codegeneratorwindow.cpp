@@ -23,6 +23,8 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::CodeGeneratorWindow)
     , params()
+    , m_dragConnectionPoint(nullptr)
+    , m_dragPath(nullptr)
     , isInCustomMode(false)
 {
     ui->setupUi(this);
@@ -32,7 +34,6 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     m_codeDisplay = new QTextEdit(this);
     m_codeDisplay->setReadOnly(true);
     m_propertyPanel = new PropertyPanel(this);
-    m_networkVisualizer = new NetworkVisualizer(this);
 
     // Set main window layout
     QWidget* centralWidget = new QWidget(this);
@@ -78,7 +79,7 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     QHBoxLayout* codeLayout = new QHBoxLayout();
     codeLayout->addWidget(m_codeDisplay); // 使用现有的代码显示框
     // 创建复制按钮
-    m_copyCodeButton = new QPushButton("copy", this);
+    m_copyCodeButton = new QPushButton("复制", this);
     connect(m_copyCodeButton, &QPushButton::clicked, this, &CodeGeneratorWindow::on_copyCodeButton_clicked);
     codeLayout->addWidget(m_copyCodeButton, 0, Qt::AlignTop | Qt::AlignRight);
     mainLayout->addLayout(codeLayout);
@@ -105,7 +106,7 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     buttonLayout->addWidget(deleteLayerButton);
 
     // Return to main menu
-    QPushButton* returnButton = new QPushButton("return", this);
+    QPushButton* returnButton = new QPushButton("返回主界面", this);
     connect(returnButton, &QPushButton::clicked, this, &CodeGeneratorWindow::on_return_mainwindow_clicked);
     buttonLayout->addWidget(returnButton);
 
@@ -116,7 +117,7 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     m_builderView->setMouseTracking(true);
     setMouseTracking(true);
 
-    //改变选择的层
+    // 在构造函数中添加
     connect(m_builderScene, &QGraphicsScene::selectionChanged,
             this, &CodeGeneratorWindow::onSceneSelectionChanged);
 
@@ -146,6 +147,11 @@ void CodeGeneratorWindow::deleteSelectedLayer() {
                     delete item;
                 }
             }
+
+            // 从连接列表中移除关联的连接对
+            m_connections.removeIf([selectedItem](const QPair<ConnectionPointItem*, ConnectionPointItem*>& pair) {
+                return pair.first->parentItem() == selectedItem || pair.second->parentItem() == selectedItem;
+            });
 
             //将selectedItems对应的层从m_layers中删除
             for (QGraphicsItem* selectedItem : selectedItems) {
@@ -180,6 +186,20 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
     QList<NeuralLayer> layers;
     QMap<ConnectionPointItem*, NeuralLayer*> pointToLayer; // 连接点到层的映射
 
+    // 收集所有层和连接点
+    /*for (QGraphicsItem* item : m_builderScene->items()) {
+        if (auto* layerItem = dynamic_cast<QGraphicsRectItem*>(item)) {
+            NeuralLayer layer = layerItem->data(0).value<NeuralLayer>();
+            layers.append(layer);
+            // 映射层的顶部和底部连接点
+            for (QGraphicsItem* child : layerItem->childItems()) {
+                if (auto* point = dynamic_cast<ConnectionPointItem*>(child)) {
+                    pointToLayer[point] = &layers.last();
+                }
+            }
+        }
+    }*/
+
     // 解析连接关系（从输出点到输入点）
     QList<NeuralLayer*> orderedLayers;
     QSet<NeuralLayer*> visited;
@@ -190,13 +210,34 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
         qDebug()<<layer.layerType;
     }
 
+    // 按连接关系遍历层
+    /*int currentIndex = 0;
+    while (currentIndex < orderedLayers.size()) {
+        NeuralLayer* currentLayer = orderedLayers[currentIndex];
+        // 查找当前层底部连接点的所有输出连接
+        for (const auto& conn : m_connections) {
+            if (conn.first->data(0).toString() == "bottom" &&
+                pointToLayer.contains(conn.first) &&
+                pointToLayer[conn.first] == currentLayer) {
+                NeuralLayer* nextLayer = pointToLayer[conn.second];
+                if (!visited.contains(nextLayer)) {
+                    orderedLayers.append(nextLayer);
+                    visited.insert(nextLayer);
+                }
+            }
+        }
+        currentIndex++;
+
+    }*/
+
     // 生成代码
     QString code = CodeGenerator::generatePyTorchCode(orderedLayers);
     m_codeDisplay->setPlainText(code);
 }
 
+
 void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
-        if (!isInCustomMode){
+    if (!isInCustomMode){
         QString layerType = item->text();
         layerType.remove(" Layer");
 
@@ -208,13 +249,13 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         MyGraphicsRectItem* layerItem = new MyGraphicsRectItem();
         layerItem->setRect(0, 0, 100, 50);
         layerItem->setBrush(color);
-
-        // 新增：将图形项指针存储在层对象中
-        layer.graphicsItem = layerItem;
-        layer.activationFunction = "relu";
-
         layerItem->setData(0, QVariant::fromValue(layer));
         m_builderScene->addItem(layerItem);
+
+        connect(layerItem, &MyGraphicsRectItem::positionChanged, this, [this, layerItem]() {
+            updateLayerConnections(layerItem);
+        });
+
 
         params["LayerType"] = layerType;
         if(layerType =="Dense"){
@@ -225,23 +266,20 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         }
         else if (layerType == "Convolutional") {
             params["filters"] = "32";
-            params["kernel_size"] = "5";
+            params["kernelSize"] = "5";
             layer.filters = 32;
             layer.kernelSize = 5;
-            layer.neurons = 1;
         }
-        else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
-            params["pooling_size"] = "4";
-            layer.poolingSize =4;
+        else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+            params["poolingSize"] = "5";
+            layer.poolingSize = 5;
             layer.neurons = 1;
         }
         else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
             params["units"] = "128";
-            layer.neurons = 1;
-            layer.units = 128;
         }
         else if (layerType == "Dropout") {
-            params["dropout_rate"] = "0.5";
+            params["dropoutRate"] = "0.5";
             layer.dropoutRate = 0.5f;
             layer.neurons =1;
         }
@@ -274,6 +312,8 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
 
         layerItem->setZValue(1);
 
+        // Add connection points to the new layer
+        // addConnectionPoints(layerItem);
     }
     else{
         m_propertyPanel->clearParameters();
@@ -298,40 +338,45 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
     // 更新选中的层的参数
     QList<QGraphicsItem*> selectedItems = m_builderScene->selectedItems();
     if (!selectedItems.isEmpty()) {
-        QGraphicsItem* selectedItem = selectedItems.first();
-        QVariant data = selectedItem->data(0);
-        if (!data.isValid()) return;
+        QGraphicsRectItem* selectedItem = qgraphicsitem_cast<QGraphicsRectItem*>(selectedItems[0]);
+        if (selectedItem) {
+            // 使用 QVariant::value() 安全地获取 NeuralLayer 对象
+            QVariant data = selectedItem->data(0);
+            NeuralLayer selectedLayer = data.value<NeuralLayer>();
+            QString layerType = params["LayerType"];
 
-        NeuralLayer layer = data.value<NeuralLayer>();
-        QString layerType = layer.layerType;  // 从层实例获取类型
+            if (layerType == "Dense") {
+                selectedLayer.neurons = params["neurons"].toInt();
+                selectedLayer.activationFunction = params["activation"];
+            }
+            else if (layerType == "Convolutional") {
+                selectedLayer.filters = params["filters"].toInt();
+                selectedLayer.kernelSize = params["kernel_size"].toInt();
+            }
+            else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+                selectedLayer.poolingSize = params["pooling_size"].toInt();
+            }
+            else if (layerType == "LSTM" || layerType == "RNN") {
+                selectedLayer.units = params["units"].toInt();
+            }
+            else if (layerType == "Dropout") {
+                selectedLayer.dropoutRate = params["dropout_rate"].toFloat();
+            }
+            else if (layerType == "Hidden") {
+                selectedLayer.neurons = params["neurons"].toInt();
+                selectedLayer.activationFunction = params["activation"];
+            }
+            else if (layerType == "Output") {
+                selectedLayer.neurons = params["neurons"].toInt();
+            }
+            // 更新其他层类型参数...
 
-        // 根据层类型更新参数
-        if (layerType == "Dense" || layerType == "Hidden" || layerType == "Input" || layerType == "Output") {
-            layer.neurons = params["neurons"].toInt();
-            layer.activationFunction = params["activation"];
-        } else if (layerType == "Convolutional") {
-            layer.filters = params["filters"].toInt();
-            layer.kernelSize = params["kernel_size"].toInt();
-        }
-        else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
-            layer.poolingSize = params["pooling_size"].toInt();
-        }
-        else if (layerType == "LSTM" || layerType == "RNN") {
-            layer.units = params["units"].toInt();
-        }
-        else if (layerType == "Dropout") {
-            layer.dropoutRate = params["dropout_rate"].toFloat();
-        }
-
-
-        // 更新图形项中的数据
-        selectedItem->setData(0, QVariant::fromValue(layer));
-
-        // 更新层列表中的数据
-        for (int i = 0; i < m_layers.size(); ++i) {
-            if (m_layers[i].layerType == layerType && m_layers[i].graphicsItem == selectedItem) {
-                m_layers[i] = layer;
-                break;
+            // 更新 m_layers 中对应层
+            for (int i = 0; i < m_layers.size(); ++i) {
+                if (m_layers[i].layerType == layerType) {
+                    m_layers[i] = selectedLayer;
+                    break;
+                }
             }
         }
     }
@@ -348,13 +393,14 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
     }
 }
 
+
 QColor CodeGeneratorWindow::colorForLayerType(const QString& layerType) {
     if (layerType == "Input") return Qt::cyan;
     else if (layerType == "Hidden") return Qt::yellow;
     else if (layerType == "Output") return Qt::magenta;
     else if (layerType == "Convolutional") return Qt::green;
     else if (layerType == "MaxPooling") return Qt::blue;
-    else if (layerType == "AveragePooling") return Qt::blue;
+    else if (layerType == "AvgPooling") return Qt::blue;
     else if (layerType == "LSTM") return Qt::red;
     else if (layerType == "RNN") return Qt::darkCyan;
     else if (layerType == "Dropout") return Qt::gray;
@@ -392,6 +438,168 @@ void CodeGeneratorWindow::dropEvent(QDropEvent* event) {
         layerItem->setBrush(colorForLayerType(layerType));
         layerItem->setData(0, QVariant::fromValue(layer));
         m_builderScene->addItem(layerItem);
+
+        // 更新连接关系（这里简单模拟连接关系）
+        updateConnections();
+    }
+}
+
+void CodeGeneratorWindow::updateConnections() {
+    // 清除现有的连接线
+    for (QGraphicsItem* item : m_builderScene->items()) {
+        if (auto* conn = dynamic_cast<QGraphicsLineItem*>(item)) {
+            if (conn != m_dragLine) {
+                m_builderScene->removeItem(conn);
+                delete conn;
+            }
+        }
+    }
+    // 重新创建连接线
+    for (QPair<ConnectionPointItem*, ConnectionPointItem*> connection : m_connections) {
+        ConnectionPointItem* fromPoint = connection.first;
+        ConnectionPointItem* toPoint = connection.second;
+
+        // 创建连接线
+        QGraphicsLineItem* conn = new QGraphicsLineItem();
+        conn->setPen(QPen(Qt::black, 2));
+        conn->setLine(QLineF(fromPoint->scenePos(), toPoint->scenePos()));
+        m_builderScene->addItem(conn);
+    }
+}
+
+void CodeGeneratorWindow::startConnectionDrag(ConnectionPointItem* connectionPoint, QGraphicsSceneMouseEvent* event) {
+    m_dragConnectionPoint = connectionPoint;
+
+    // Create temporary curve
+    m_dragPath = new QGraphicsPathItem();
+    m_dragPath->setPen(QPen(Qt::gray, 2, Qt::DashLine));
+    m_builderScene->addItem(m_dragPath);
+
+    // Initialize the path with current position
+    updateDragPath(event->scenePos());
+}
+
+void CodeGeneratorWindow::updateDragLine(const QPointF& pos) {
+    if (m_dragConnectionPoint && m_dragLine) {
+        QPointF startPoint = m_dragConnectionPoint->scenePos();
+        startPoint.setY(startPoint.y() + (m_dragConnectionPoint->data(0).toString() == "top" ? 5 : -5));
+        m_dragLine->setLine(QLineF(startPoint, pos));
+    }
+}
+
+void CodeGeneratorWindow::endConnectionDrag(QGraphicsSceneMouseEvent* event) {
+    if (m_dragPath) {
+        ConnectionPointItem* targetPoint = nullptr;
+        const double CONNECTION_THRESHOLD = 10.0; // 连接阈值（像素）
+
+        QPointF scenePos = event->scenePos();
+
+        // 查找有效连接点（距离小于阈值且非自身）
+        for (QGraphicsItem* item : m_builderScene->items()) {
+            auto* point = dynamic_cast<ConnectionPointItem*>(item);
+            if (point && point != m_dragConnectionPoint) {
+                double distance = QLineF(scenePos, point->scenePos()).length();
+                if (distance < CONNECTION_THRESHOLD) {
+                    targetPoint = point;
+                    break; // 取最近的一个
+                }
+            }
+        }
+
+        if (targetPoint) {
+            createConnection(m_dragConnectionPoint, targetPoint);
+        } else {
+            // 无效连接，删除拖拽路径
+            m_builderScene->removeItem(m_dragPath);
+            delete m_dragPath;
+            m_dragPath = nullptr;
+        }
+        m_dragConnectionPoint = nullptr;
+    }
+}
+
+void CodeGeneratorWindow::updateDragPath(const QPointF& pos) {
+    if (m_dragConnectionPoint && m_dragPath) {
+        QPointF start = m_dragConnectionPoint->scenePos() + QPointF(5, 5); // Center of the connection point
+        QPainterPath path;
+        path.moveTo(start);
+
+        // Create quadratic Bezier curve
+        QPointF controlPoint((start.x() + pos.x())/2, (start.y() + pos.y())/2);
+        path.quadTo(controlPoint, pos);
+
+        m_dragPath->setPath(path);
+    }
+}
+
+void CodeGeneratorWindow::mouseMoveEvent(QMouseEvent* event) {
+    if (m_dragConnectionPoint) {
+        QPointF scenePos = m_builderView->mapToScene(event->pos());
+        updateDragPath(scenePos);
+    }
+    QDialog::mouseMoveEvent(event);
+}
+
+void CodeGeneratorWindow::mouseReleaseEvent(QMouseEvent* event) {
+    if (m_dragConnectionPoint) {
+        QPointF scenePos = m_builderView->mapToScene(event->pos());
+
+        // Find if we're releasing over another connection point
+        QGraphicsItem* item = m_builderScene->itemAt(scenePos, QTransform());
+        if (item && item != m_dragConnectionPoint) {
+            ConnectionPointItem* targetPoint = dynamic_cast<ConnectionPointItem*>(item);
+            if (targetPoint && targetPoint->parentItem() != m_dragConnectionPoint->parentItem()) {
+                createConnection(m_dragConnectionPoint, targetPoint);
+            }
+        }
+
+        // Clean up temporary drag path
+        if (m_dragPath) {
+            m_builderScene->removeItem(m_dragPath);
+            delete m_dragPath;
+            m_dragPath = nullptr;
+        }
+
+        m_dragConnectionPoint = nullptr;
+    }
+    QDialog::mouseReleaseEvent(event);
+}
+
+void CodeGeneratorWindow::createConnection(ConnectionPointItem* fromPoint, ConnectionPointItem* toPoint) {
+    // Create permanent connection curve
+    QGraphicsPathItem* conn = new QGraphicsPathItem();
+    conn->setPen(QPen(Qt::black, 2));
+
+    QPointF start = fromPoint->scenePos() + QPointF(5, 5);
+    QPointF end = toPoint->scenePos() + QPointF(5, 5);
+    QPointF controlPoint((start.x() + end.x())/2, (start.y() + end.y())/2);
+
+    QPainterPath path;
+    path.moveTo(start);
+    path.quadTo(controlPoint, end);
+    conn->setPath(path);
+
+    m_builderScene->addItem(conn);
+    conn->setZValue(0); // Behind layers
+    m_connections.append(qMakePair(fromPoint, toPoint));
+    m_connectionItems.append(conn);
+}
+
+void CodeGeneratorWindow::updateLayerConnections(QGraphicsRectItem* layerItem) {
+    for (int i = 0; i < m_connections.size(); ++i) {
+        auto& pair = m_connections[i];
+        auto* connItem = m_connectionItems[i];
+
+        if (pair.first->parentItem() == layerItem || pair.second->parentItem() == layerItem) {
+            QPointF start = pair.first->scenePos() + QPointF(5, 5);
+            QPointF end = pair.second->scenePos() + QPointF(5, 5);
+            QPointF controlPoint((start.x() + end.x())/2, (start.y() + end.y())/2);
+
+            QPainterPath path;
+            path.moveTo(start);
+            path.quadTo(controlPoint, end);
+            connItem->setPath(path);
+        }
     }
 }
 

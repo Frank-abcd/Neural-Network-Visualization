@@ -22,47 +22,58 @@ SOURCES += \
     layeritem.cpp \
     main.cpp \
     mainwindow.cpp \
-    matrial.cpp \
-    movablelayergroup.cpp \
+    matrial.cpp\
     networkvisualizer.cpp \
     neuronitem.cpp \
     programfragmentprocessor.cpp \
-    propertypanel.cpp \
-    resourcepage.cpp
+    propertypanel.cpp
 
 HEADERS += \
     backend.h \
     codegenerator.h \
     codegeneratorwindow.h \
     colorthememanager.h \
-    colorthememanager.h \
     connectionitem.h \
     json_utils.h \
     layerblockitem.h \
     layeritem.h \
     mainwindow.h \
-    matrial.h \
-    movablelayergroup.h \
+    matrial.h\
     networkvisualizer.h \
     neuronitem.h \
     programfragmentprocessor.h \
-    propertypanel.h \
-    resourcepage.h
+    propertypanel.h
 
 FORMS += \
-    mainwindow.ui \
     codegeneratorwindow.ui \
+    mainwindow.ui \
     matrial.ui
 
-RESOURCES += resource.qrc
-
+#TRANSLATIONS += \
+    #CodeWings_zh_CN.ts
 CONFIG += lrelease
-CONFIG += embed_translations
+#CONFIG += embed_translations
 
 # Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+#qnx: target.path = /tmp/$${TARGET}/bin
+#else: unix:!android: target.path = /opt/$${TARGET}/bin
+#!isEmpty(target.path): INSTALLS += target
 
+#RESOURCES += \
+    #resource.qrc
 
-DISTFILES +=*/
+DISTFILES += \
+    .gitignore \
+    Icon/theme-blue.png \
+    Icon/theme-green.png \
+    Icon/theme-grey.png \
+    Icon/theme-pink.png \
+    Icon/theme-purple.png \
+    Icon/theme-white.png \
+    Icon/theme-yellow.png \
+    Neural_Network_Visualization.pro.user \
+    Neural_Network_Visualization.pro.user.344c8fb
+
+RESOURCES += \
+    resource.qrc \
+    resource.qrc
