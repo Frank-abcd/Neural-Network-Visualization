@@ -1,4 +1,5 @@
 
+
 #include "codegeneratorwindow.h"
 #include "ui_codegeneratorwindow.h"
 #include "mainwindow.h"
@@ -29,12 +30,13 @@ CodeGeneratorWindow::CodeGeneratorWindow(QWidget *parent)
     , isInCustomMode(false)
 {
     ui->setupUi(this);
-    // 初始化 networkvisualizer
+    // 初始化
     m_builderScene = new QGraphicsScene(this);
     m_builderView = new QGraphicsView(m_builderScene, this);
     m_codeDisplay = new QTextEdit(this);
     m_codeDisplay->setReadOnly(true);
     m_propertyPanel = new PropertyPanel(this);
+    m_networkVisualizer = new NetworkVisualizer(this);
 
     //mainwindow layout
     QWidget* centralWidget = new QWidget(this);
@@ -153,7 +155,7 @@ void CodeGeneratorWindow::deleteSelectedLayer() {
             for (QGraphicsItem* selectedItem : selectedItems) {
                 // 找到与选中图元对应的层
                 for (int i = 0; i < m_layers.size(); ++i) {
-                    if (m_layers[i].layerType == selectedItem->data(0).value<NeuralLayer>().layerType) {
+                    if (m_layers[i]->layerType == selectedItem->data(0).value<NeuralLayer>().layerType) {
                         // 从 m_layers 中移除对应的层
                         m_layers.removeAt(i);
                         break;
@@ -186,10 +188,10 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
     QList<NeuralLayer*> orderedLayers;
     QSet<NeuralLayer*> visited;
 
-    for (NeuralLayer& layer : m_layers) {
-        orderedLayers.append(&layer);
-        visited.insert(&layer);
-        qDebug()<<layer.layerType;
+    for (NeuralLayer* layer : m_layers) {
+        orderedLayers.append(layer);
+        visited.insert(layer);
+        qDebug()<<layer->layerType;
     }
 
 
@@ -199,13 +201,16 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
     m_codeDisplay->setPlainText(code);
 }
 
+
 void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
     if (!isInCustomMode){
         QString layerType = item->text();
         layerType.remove(" Layer");
 
-        NeuralLayer layer;
-        layer.layerType = layerType;
+        //NeuralLayer layer;
+        NeuralLayer* layer = new NeuralLayer();
+
+        layer->layerType = layerType;
 
         QColor color = colorForLayerType(layerType);
 
@@ -224,43 +229,43 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         if(layerType =="Dense"){
             params["neurons"] = "10";
             params["activation"] = "ReLU";
-            layer.neurons = 10;
-            layer.activationFunction = "ReLU";
+            layer->neurons = 10;
+            layer->activationFunction = "ReLU";
         }
         else if (layerType == "Convolutional") {
             params["filters"] = "32";
             params["kernelSize"] = "5";
-            layer.filters = 32;
-            layer.kernelSize = 5;
-            layer.neurons = 1;
+            layer->filters = 32;
+            layer->kernelSize = 5;
+            layer->neurons = 1;
         }
         else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-            params["poolingSize"] = "5";
-            layer.poolingSize = 5;
-            layer.neurons = 1;
+            params["poolingSize"] = "4";
+            layer->poolingSize = 4;
+            layer->neurons = 1;
         }
         else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
             params["units"] = "128";
-            layer.neurons = 1;
+            layer->neurons = 1;
         }
         else if (layerType == "Dropout") {
             params["dropoutRate"] = "0.5";
-            layer.dropoutRate = 0.5f;
-            layer.neurons =1;
+            layer->dropoutRate = 0.5f;
+            layer->neurons =1;
         }
         else if (layerType == "Input") {
             params["neurons"] = "15";
-            layer.neurons = 15;
+            layer->neurons = 15;
         }
         else if (layerType == "Output") {
             params["neurons"] = "2";
-            layer.neurons = 2;
+            layer->neurons = 2;
         }
         else if (layerType == "Hidden") {
             params["neurons"] = "10";
             params["activation"] = "ReLU";
-            layer.neurons = 10;
-            layer.activationFunction = "ReLU";
+            layer->neurons = 10;
+            layer->activationFunction = "ReLU";
         }
         m_layers.append(layer);
 
@@ -298,65 +303,58 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         drag->exec(Qt::CopyAction);
     }
 }
-
 void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QString, QString>& params) {
-    // 更新选中的层的参数
     QList<QGraphicsItem*> selectedItems = m_builderScene->selectedItems();
-    if (!selectedItems.isEmpty()) {
-        QGraphicsRectItem* selectedItem = qgraphicsitem_cast<QGraphicsRectItem*>(selectedItems[0]);
-        if (selectedItem) {
-            // 获取 NeuralLayer 对象
-            QVariant data = selectedItem->data(0);
-            NeuralLayer selectedLayer = data.value<NeuralLayer>();
-            QString layerType = params["LayerType"];
-
-            if (layerType == "Dense") {
-                selectedLayer.neurons = params["neurons"].toInt();
-                selectedLayer.activationFunction = params["activation"];
-            }
-            else if (layerType == "Convolutional") {
-                selectedLayer.filters = params["filters"].toInt();
-                selectedLayer.kernelSize = params["kernel_size"].toInt();
-            }
-            else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-                selectedLayer.poolingSize = params["pooling_size"].toInt();
-            }
-            else if (layerType == "LSTM" || layerType == "RNN") {
-                selectedLayer.units = params["units"].toInt();
-            }
-            else if (layerType == "Dropout") {
-                selectedLayer.dropoutRate = params["dropout_rate"].toFloat();
-            }
-            else if (layerType == "Hidden") {
-                selectedLayer.neurons = params["neurons"].toInt();
-                selectedLayer.activationFunction = params["activation"];
-            }
-            else if (layerType == "Output") {
-                selectedLayer.neurons = params["neurons"].toInt();
-            }
-            selectedItem->setData(0, QVariant::fromValue(selectedLayer));//更新
-
-            // 更新 m_layers 中对应层
-            for (int i = 0; i < m_layers.size(); ++i) {
-                if (m_layers[i].layerType == layerType) {
-                    m_layers[i] = selectedLayer;
-                    break;
-                }
-            }
-
-        }
-    }
-    else{
-        // 显示消息
+    if (selectedItems.isEmpty()) {
+        // 弹出提示
         QMessageBox* msgBox = new QMessageBox(this);
-        msgBox->setWindowTitle("Conform");
+        msgBox->setWindowTitle("Confirm");
         msgBox->setText("Please select a layer");
         msgBox->setIcon(QMessageBox::Information);
-        msgBox->setStandardButtons(QMessageBox::NoButton); // 无按钮
+        msgBox->setStandardButtons(QMessageBox::NoButton);
         msgBox->show();
-        // 3秒后自动关闭
         QTimer::singleShot(3000, msgBox, &QMessageBox::deleteLater);
+        return;
     }
+
+    QGraphicsRectItem* selectedItem = qgraphicsitem_cast<QGraphicsRectItem*>(selectedItems[0]);
+    if (!selectedItem) return;
+
+    QVariant data = selectedItem->data(0);
+    NeuralLayer* selectedLayer = data.value<NeuralLayer*>();
+    if (!selectedLayer) return;
+
+    //QString layerType = selectedLayer->layerType;
+    QSharedPointer<NeuralLayer> updatedLayer = QSharedPointer<NeuralLayer>::create(*selectedLayer);
+
+    // 更新参数
+    QString layerType = updatedLayer->layerType;
+
+    if (layerType == "Dense" || layerType == "Hidden") {
+        selectedLayer->neurons = params["neurons"].toInt();
+        selectedLayer->activationFunction = params["activation"];
+    }
+    else if (layerType == "Convolutional") {
+        selectedLayer->filters = params["filters"].toInt();
+        selectedLayer->kernelSize = params["kernel_size"].toInt();
+    }
+    else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+       updatedLayer->poolingSize = params["pooling_size"].toInt();
+    }
+    else if (layerType == "LSTM" || layerType == "RNN") {
+        selectedLayer->units = params["units"].toInt();
+    }
+    else if (layerType == "Dropout") {
+        updatedLayer->dropoutRate = params["dropout_rate"].toFloat();
+    }
+    else if (layerType == "Input" || layerType == "Output") {
+        selectedLayer->neurons = params["neurons"].toInt();
+    }
+    m_layerStorage.append(updatedLayer);
+
+    // 刷新可视化
+    m_networkVisualizer->refreshLayerItem(updatedLayer.get());
+    //m_networkVisualizer->refreshLayerItem(selectedLayer);
 }
 
 QColor CodeGeneratorWindow::colorForLayerType(const QString& layerType) {
@@ -383,8 +381,8 @@ void CodeGeneratorWindow::dropEvent(QDropEvent* event) {
         QString layerType = event->mimeData()->text();
 
         // 创建新nL对象
-        NeuralLayer layer;
-        layer.layerType = layerType;
+        NeuralLayer* layer;
+        layer->layerType = layerType;
 
         // 在工作区创建标签表示神经网络层
         QLabel* layerLabel = new QLabel(this);
@@ -598,8 +596,9 @@ void CodeGeneratorWindow::on_copyCodeButton_clicked() {
 
 QJsonArray CodeGeneratorWindow::getNetworkAsJson() const {
     QJsonArray array;
-    for (const NeuralLayer& layer : m_layers) {
-        array.append(layer.toJsonObject());
+    for (const NeuralLayer* layer : m_layers) {
+        if (layer)
+            array.append(layer->toJsonObject());
     }
     return array;
 }
