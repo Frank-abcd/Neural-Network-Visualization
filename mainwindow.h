@@ -60,18 +60,14 @@ private:
     NetworkVisualizer* visualizer = nullptr;
 
 private slots:
-    void on_user_clicked();
-    void on_mode_clicked();
-    void on_generate_code_clicked();
-    void on_generate_image_clicked();
-
-    void on_toolButton_clicked();
-
-    void on_history_clicked();
-    void on_start_new_clicked();
-    void on_previous_clicked();
-    void on_turnback_clicked();
-    void on_save_clicked();
+    void on_userGuide_clicked();
+    void on_generateCode_clicked();
+    void on_generateImage_clicked();
+    void on_checkHistory_clicked();
+    void on_startNew_clicked();
+    void on_lastStep_clicked();
+    void on_nextStep_clicked();
+    void on_saveCurrent_clicked();
 
 };
 #endif // MAINWINDOW_H

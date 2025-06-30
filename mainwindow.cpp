@@ -60,18 +60,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setBackground(":/Icon/background.jpg");
 
-    /*
-    setupIconButton(ui->user, ":/Icon/user.png");
-    setupIconButton(ui->mode, ":/Icon/mode.png");
-    setupIconButton(ui->generate_code, ":/Icon/code.png");
-    setupIconButton(ui->generate_image, ":/Icon/image.png");
-    setupIconButton(ui->history, ":/Icon/history.png");
-    setupIconButton(ui->start_new, ":/Icon/new.png");
-    setupIconButton(ui->previous, ":/Icon/previous.png");
-    setupIconButton(ui->turnback, ":/Icon/turnback.png");
-    setupIconButton(ui->save, ":/Icon/save.png");
-    */
-
     QToolTip::setFont(QFont("Microsoft YaHei", 10));
 
     QString tooltipStyle = R"(
@@ -84,16 +72,17 @@ MainWindow::MainWindow(QWidget *parent)
     } )";
 
     qApp->setStyleSheet(qApp->styleSheet() + tooltipStyle);
-    ui->imagecolor->setToolTip("切换图像颜色套组");
-    ui->user->setToolTip("切换界面颜色");
-    ui->mode->setToolTip("切换显示模式");
-    ui->generate_code->setToolTip("生成 PyTorch 代码");
-    ui->generate_image->setToolTip("生成网络结构图像");
-    ui->history->setToolTip("查看已保存的历史");
-    ui->start_new->setToolTip("开始新的神经网络");
-    ui->previous->setToolTip("返回上一步");
-    ui->turnback->setToolTip("展示网络图片");
-    ui->save->setToolTip("保存当前神经网络结构");
+    ui->userGuide->setToolTip("查看使用说明");
+    ui->pageColor->setToolTip("切面界面颜色");
+    ui->neuralTheme->setToolTip("切换图像主题");
+    ui->selectMode->setToolTip("切换显示模式");
+    ui->generateCode->setToolTip("生成 PyTorch 代码");
+    ui->generateImage->setToolTip("生成网络结构图像");
+    ui->checkHistory->setToolTip("查看已保存的历史");
+    ui->startNew->setToolTip("开始新的神经网络");
+    ui->lastStep->setToolTip("返回上一步");
+    ui->nextStep->setToolTip("展示网络图片");
+    ui->saveCurrent->setToolTip("保存当前神经网络结构");
 
     QMenu* themeMenu = new QMenu("切换主题", this);
     themeMenu->addAction("white", this, [=]() { applyTheme("white"); });
@@ -104,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
     themeMenu->addAction("green", this, [=]() { applyTheme("green"); });
     themeMenu->addAction("grey", this, [=]() { applyTheme("grey"); });
 
-    ui->user->setMenu(themeMenu);  // 设置菜单挂载到按钮
+    ui->pageColor->setMenu(themeMenu);  // 设置菜单挂载到按钮
 
     QMenu* colorMenu = new QMenu(this);
 
@@ -116,7 +105,7 @@ MainWindow::MainWindow(QWidget *parent)
     colorMenu->addAction(vibrant);
     colorMenu->addAction(dark);
     colorMenu->addAction(ocean);
-    ui->imagecolor->setMenu(colorMenu);
+    ui->neuralTheme->setMenu(colorMenu);
 
     connect(classic, &QAction::triggered, this, [=]() {
         ColorThemeManager::setCurrentTheme("Classic");
@@ -137,19 +126,19 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     codegeneratorwindow = new CodeGeneratorWindow(this);
-    connect(ui->generate_code, &QPushButton::clicked, this, &MainWindow::on_generate_code_clicked);
+    connect(ui->generateCode, &QPushButton::clicked, this, &MainWindow::on_generateCode_clicked);
     QMenu* modeMenu = new QMenu(this);
 
     matrialwindow = new Matrial(this);
     matrialwindow->hide();
-    connect(ui->turnback, &QPushButton::clicked, this, &MainWindow::on_turnback_clicked);
+    connect(ui->userGuide, &QPushButton::clicked, this, &MainWindow::on_userGuide_clicked);
 
     QAction* blockGenerateAction = new QAction("BlockGenerate 模式", this);
     QAction* neuronitemGenerateAction = new QAction("NeuronitemGenerate 模式", this);
 
     modeMenu->addAction(blockGenerateAction);
     modeMenu->addAction(neuronitemGenerateAction);
-    ui->mode->setMenu(modeMenu);
+    ui->selectMode->setMenu(modeMenu);
 
     connect(blockGenerateAction, &QAction::triggered, this, [=]() {
         currentMode = "BlockGenerate";
@@ -165,19 +154,13 @@ MainWindow::MainWindow(QWidget *parent)
     currentNetworkSaved=0;
 }
 
-void MainWindow::on_user_clicked()
+void MainWindow::on_userGuide_clicked()
 {
-    qDebug() << "user 按钮点击了";
-    // 在这里实现你希望的功能逻辑
+    this->hide();
+    matrialwindow->show();
 }
 
-void MainWindow::on_mode_clicked()
-{
-    qDebug() << "mode 按钮点击了";
-
-}
-
-void MainWindow::on_generate_code_clicked()
+void MainWindow::on_generateCode_clicked()
 {
     if (!codeWin) {
         codeWin = new CodeGeneratorWindow(this);
@@ -189,7 +172,7 @@ void MainWindow::on_generate_code_clicked()
     imageGenerate = 0;
 }
 
-void MainWindow::on_generate_image_clicked()
+void MainWindow::on_generateImage_clicked()
 {
     if (!codeWin) {
         showWarningMessage("尚未创建网络结构！");
@@ -243,7 +226,7 @@ void MainWindow::on_generate_image_clicked()
     imageGenerate=1;
 }
 
-void MainWindow::on_history_clicked()
+void MainWindow::on_checkHistory_clicked()
 {
     QDialog* dialog = new QDialog(this);
     dialog->setWindowTitle("历史记录");
@@ -349,7 +332,7 @@ void MainWindow::onHistoryRecordClicked(int index){
     showFloatingMessage(QString("✅ 已加载历史记录：%1").arg(historyLabel[index]));
 }
 
-void MainWindow::on_start_new_clicked()
+void MainWindow::on_startNew_clicked()
 {
     // 1. 弹出确认对话框
     if (!currentNetworkSaved){
@@ -408,23 +391,20 @@ void MainWindow::on_start_new_clicked()
     showFloatingMessage("已清空网络结构，开始新的构建");
 }
 
-void MainWindow::on_previous_clicked()
+void MainWindow::on_lastStep_clicked()
 {
 
 }
 
-void MainWindow::on_toolButton_clicked()
+void MainWindow::on_nextStep_clicked()
 {
 
 }
 
-void MainWindow::on_turnback_clicked()
-{
-    this->hide();
-    matrialwindow->show();
-}
-
-void MainWindow::on_save_clicked(){
+void MainWindow::on_saveCurrent_clicked(){
+    if (!codeWin){
+        return;
+    }
     if (!imageGenerate){
         historySaved.push_back(false);
         QJsonArray structure = codeWin->getNetworkAsJson();
@@ -764,16 +744,17 @@ void MainWindow::applyTheme(const QString& theme)
                             .arg(tooltipColor)
                         );
 
-    setupIconButton(ui->user, ":/Icon/user-"+theme+".png");
-    setupIconButton(ui->mode, ":/Icon/mode-"+theme+".png");
-    setupIconButton(ui->generate_code, ":/Icon/code-"+theme+".png");
-    setupIconButton(ui->generate_image, ":/Icon/image-"+theme+".png");
-    setupIconButton(ui->history, ":/Icon/history-"+theme+".png");
-    setupIconButton(ui->start_new, ":/Icon/new-"+theme+".png");
-    setupIconButton(ui->previous, ":/Icon/previous-"+theme+".png");
-    setupIconButton(ui->turnback, ":/Icon/turnback-"+theme+".png");
-    setupIconButton(ui->save, ":/Icon/save-"+theme+".png");
-    setupIconButton(ui->imagecolor, ":/Icon/color-"+theme+".png");
+    setupIconButton(ui->userGuide, ":/Icon/user-"+theme+".png");
+    setupIconButton(ui->pageColor, ":/Icon/user-"+theme+".png");
+    setupIconButton(ui->neuralTheme, ":/Icon/color-"+theme+".png");
+    setupIconButton(ui->selectMode, ":/Icon/mode-"+theme+".png");
+    setupIconButton(ui->generateCode, ":/Icon/code-"+theme+".png");
+    setupIconButton(ui->generateImage, ":/Icon/image-"+theme+".png");
+    setupIconButton(ui->checkHistory, ":/Icon/history-"+theme+".png");
+    setupIconButton(ui->startNew, ":/Icon/new-"+theme+".png");
+    setupIconButton(ui->lastStep, ":/Icon/previous-"+theme+".png");
+    setupIconButton(ui->nextStep, ":/Icon/turnback-"+theme+".png");
+    setupIconButton(ui->saveCurrent, ":/Icon/save-"+theme+".png");
 
     if (!original) {
         showFloatingMessage("🎨 已切换主题：" + theme);
