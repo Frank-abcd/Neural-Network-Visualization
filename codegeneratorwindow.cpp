@@ -353,7 +353,7 @@ QColor CodeGeneratorWindow::colorForLayerType(const QString& layerType) {
     else if (layerType == "Output") return Qt::magenta;
     else if (layerType == "Convolutional") return Qt::green;
     else if (layerType == "MaxPooling") return Qt::blue;
-    else if (layerType == "AvgPooling") return Qt::blue;
+    else if (layerType == "AveragePooling") return Qt::blue;
     else if (layerType == "LSTM") return Qt::red;
     else if (layerType == "RNN") return Qt::darkCyan;
     else if (layerType == "Dropout") return Qt::gray;
