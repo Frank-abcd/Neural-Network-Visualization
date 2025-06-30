@@ -5,7 +5,6 @@
 #include <QMetaType>
 #include <QTranslator>
 #include "networkvisualizer.h"
-#include "layerblockitem.h"
 
 int main(int argc, char *argv[])
 {
