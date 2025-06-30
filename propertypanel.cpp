@@ -5,7 +5,7 @@
 PropertyPanel::PropertyPanel(QWidget *parent) : QWidget(parent)
 {
     layout = new QFormLayout(this);
-    updateBtn = new QPushButton("更新参数", this);
+    updateBtn = new QPushButton("update parameters", this);
     layout->addWidget(updateBtn);
     layout->setSpacing(15);
 
