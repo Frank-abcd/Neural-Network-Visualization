@@ -47,29 +47,29 @@ Matrial::~Matrial()
 
 void Matrial::setupUI()
 {
-    // 创建中央部件
+    // 中央部件
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
-    // 创建主布局
+    // 主布局
     mainLayout = new QVBoxLayout(centralWidget);
 
-    // 创建图片显示标签
+    // 图片显示标签
     imageLabel = new QLabel(this);
     imageLabel->setAlignment(Qt::AlignCenter);
     imageLabel->setStyleSheet("QLabel { border: 2px solid #cccccc; background-color: #f5f5f5; }");
     imageLabel->setMinimumSize(600, 400);
     imageLabel->setScaledContents(false);
 
-    // 创建页码标签
+    // 页码标签
     pageLabel = new QLabel("第 1 页 共 1 页", this);
     pageLabel->setAlignment(Qt::AlignCenter);
     pageLabel->setStyleSheet("QLabel { font-weight: bold; font-size: 14px; color: #333333; }");
 
-    // 创建按钮布局
+    // 按钮布局
     buttonLayout = new QHBoxLayout();
 
-    // 创建上一页按钮
+    // 上一页
     prevButton = new QPushButton("← 上一页", this);
     prevButton->setEnabled(false);
     prevButton->setStyleSheet(
@@ -90,7 +90,7 @@ void Matrial::setupUI()
         "}"
         );
 
-    // 创建下一页按钮
+    // 下一页
     nextButton = new QPushButton("下一页 →", this);
     nextButton->setStyleSheet(
         "QPushButton {"
@@ -110,11 +110,13 @@ void Matrial::setupUI()
         "}"
         );
 
-    // 连接信号和槽
+
+    // 信号和槽
     connect(prevButton, &QPushButton::clicked, this, &Matrial::previousImage);
     connect(nextButton, &QPushButton::clicked, this, &Matrial::nextImage);
 
     // 添加按钮到布局
+
     buttonLayout->addStretch();
     buttonLayout->addWidget(prevButton);
     buttonLayout->addSpacing(20);
@@ -135,15 +137,14 @@ void Matrial::setupUI()
 
 void Matrial::loadImages()
 {
-    // 从资源文件中加载图片路径
-    // 您需要根据实际的资源文件结构修改这些路径
+    // 从文件加载图片路径
     imagePaths << ":/images/neural_network_1.png"
                << ":/images/neural_network_2.png"
                << ":/images/neural_network_3.png"
                << ":/images/neural_network_4.png"
                << ":/images/neural_network_5.png";
 
-    // 预加载所有图片
+    // 预加载
     images.clear();
     for (const QString &path : imagePaths) {
         QPixmap pixmap(path);
@@ -157,7 +158,7 @@ void Matrial::loadImages()
         }
     }
 
-    // 如果没有图片，添加一个默认图片
+    // 如果没有图
     if (images.isEmpty()) {
         QPixmap defaultPixmap(400, 300);
         defaultPixmap.fill(Qt::lightGray);
@@ -175,7 +176,7 @@ void Matrial::updateImage()
     // 获取当前图片
     QPixmap currentPixmap = images[currentIndex];
 
-    // 缩放图片以适应标签大小，保持纵横比
+    // 缩放图片适应标签保持纵横比
     QSize labelSize = imageLabel->size();
     QPixmap scaledPixmap = currentPixmap.scaled(
         labelSize,
@@ -185,7 +186,7 @@ void Matrial::updateImage()
 
     imageLabel->setPixmap(scaledPixmap);
 
-    // 更新页码标签
+    // 更新页码
     pageLabel->setText(QString("第 %1 页 共 %2 页").arg(currentIndex + 1).arg(images.size()));
 
     // 更新按钮状态
@@ -212,7 +213,7 @@ void Matrial::nextImage()
 void Matrial::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    // 窗口大小改变时重新缩放图片
+    // 窗口大小改变时缩放图片
     updateImage();
 }
 
