@@ -8,7 +8,6 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QGraphicsRectItem>
-#include "layerblockitem.h"
 #include "colorthememanager.h"
 
 NetworkVisualizer::NetworkVisualizer(QWidget* parent)
@@ -20,11 +19,16 @@ NetworkVisualizer::NetworkVisualizer(QWidget* parent)
 }
 
 QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
+    const NeuralLayer& layer,
 
-    const QString& layerName,
-    const QString& activation,
     int yPos
     ) {
+    const QString layerName = QString("%1").arg(layer.layerType);
+    const QString activation= QString("%1").arg(layer.activationFunction);
+    if (layerName=="Dropout"){
+
+
+    }
     const int width = 160;
     const int height = 130;
     const int x = 100;
@@ -69,6 +73,24 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
         QGraphicsTextItem* plusLabel = new QGraphicsTextItem("+", plus);
         plusLabel->setPos(2, 0);
     }
+    if (layerName == "Dropout") {
+        // 1. 创建 Dropout 层的矩形框（初始宽度设为 100，后面会根据文本调整）
+        QGraphicsRectItem* act = new QGraphicsRectItem(0, 0, 100, 26);
+        act->setBrush(theme.activationBoxFill);
+        act->setPos(30, 90);
+        group->addToGroup(act);
+
+        // 2. 创建标签文本（强制显示 4 位小数）
+        QString dropoutText = QString("Dropout: %1").arg(layer.dropoutRate, 0, 'f', 4);
+        QGraphicsTextItem* actLabel = new QGraphicsTextItem(dropoutText, act);
+        actLabel->setPos(10, 5);
+
+        // 3. 动态计算文本宽度，并调整矩形框大小（关键修改部分）
+        QFontMetrics metrics(actLabel->font());
+        int textWidth = metrics.horizontalAdvance(dropoutText);  // 获取文本像素宽度
+        act->setRect(0, 0, textWidth + 20, 26);
+
+    }
 
     if (!activation.trimmed().isEmpty()) {
         act = new QGraphicsRectItem(0, 0, 100, 26);
@@ -78,6 +100,7 @@ QGraphicsItemGroup* NetworkVisualizer::createDetailedLayer(
         QGraphicsTextItem* actLabel = new QGraphicsTextItem(activation, act);
         actLabel->setPos(10, 5);
     }
+
     if (w) w->setZValue(1);
     if (b) b->setZValue(1);
     if (plus) plus->setZValue(1);
@@ -238,10 +261,8 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
     for (int i = 0; i < layers.size(); ++i) {
         const NeuralLayer& layer = layers[i];
 
-        QString layerTitle = QString("%1").arg(layer.layerType);
         QGraphicsItemGroup* group = createDetailedLayer(
-            layerTitle,
-            layer.activationFunction,
+            layer,
             20 + i * layerSpacing
             );
         layerGroups.append(group);
