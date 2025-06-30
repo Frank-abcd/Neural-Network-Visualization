@@ -18,6 +18,7 @@ SOURCES += \
     colorthememanager.cpp \
     connectionitem.cpp \
     json_utils.cpp \
+    layerblockitem.cpp \
     layeritem.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     colorthememanager.h \
     connectionitem.h \
     json_utils.h \
+    layerblockitem.h \
     layeritem.h \
     mainwindow.h \
     matrial.h\
@@ -44,7 +46,8 @@ HEADERS += \
 
 FORMS += \
     mainwindow.ui \
-    codegeneratorwindow.ui
+    codegeneratorwindow.ui \
+    matrial.ui
 
 #TRANSLATIONS += \
     #CodeWings_zh_CN.ts
@@ -59,7 +62,11 @@ CONFIG += lrelease
 #RESOURCES += \
     #resource.qrc
 
-DISTFILES +=
+DISTFILES += \
+    .gitignore \
+    Neural_Network_Visualization.pro.user \
+    Neural_Network_Visualization.pro.user.344c8fb
 
 RESOURCES += \
+    resource.qrc \
     resource.qrc
