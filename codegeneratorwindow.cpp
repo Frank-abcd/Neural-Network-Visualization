@@ -215,11 +215,6 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         layerItem->setData(0, QVariant::fromValue(layer));
         m_builderScene->addItem(layerItem);
 
-        // connect(layerItem, &MyGraphicsRectItem::positionChanged, this, [this, layerItem]() {
-        //     updateLayerConnections(layerItem);
-        // });
-
-
         params["LayerType"] = layerType;
         if(layerType =="Dense"){
             params["neurons"] = "10";
@@ -328,9 +323,9 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
         // 更新图形项中的数据
         selectedItem->setData(0, QVariant::fromValue(layer));
 
-        // 更新层列表中的数据（可选）
+        // 更新层列表中的数据
         for (int i = 0; i < m_layers.size(); ++i) {
-            if (m_layers[i].layerType == layerType) {
+            if (m_layers[i].layerType == layerType && m_layers[i].graphicsItem == selectedItem) {
                 m_layers[i] = layer;
                 break;
             }
