@@ -8,6 +8,7 @@
 #include "codegeneratorwindow.h"
 #include "networkvisualizer.h"
 #include "matrial.h"
+#include "resourcepage.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -52,6 +53,7 @@ private:
     void setupIconButton(QPushButton* button, const QString& iconPath, int size = 40);
     void setBackground(const QString& background);
     CodeGeneratorWindow* codegeneratorwindow;
+    ResourcePage *resourcePage;
     Matrial* matrialwindow;
     QGraphicsScene* scene;
     QJsonArray m_cachedNetworkJson;
@@ -71,6 +73,8 @@ private slots:
     void on_previous_clicked();
     void on_turnback_clicked();
     void on_save_clicked();
+
+    void onReturnFromResource();
 
 };
 #endif // MAINWINDOW_H

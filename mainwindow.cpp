@@ -5,6 +5,7 @@
 #include "propertypanel.h"
 #include "networkvisualizer.h"
 #include "matrial.h"
+#include "resourcepage.h"
 #include <QIcon>
 #include <QPushButton>
 #include <QJsonDocument>
@@ -90,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->history->setToolTip("查看已保存的历史");
     ui->start_new->setToolTip("开始新的神经网络");
     ui->previous->setToolTip("返回上一步");
-    ui->turnback->setToolTip("展示网络图片");
+    ui->turnback->setToolTip("前进到下一步");
     ui->save->setToolTip("保存当前神经网络结构");
 
     QMenu* themeMenu = new QMenu("切换主题", this);
@@ -172,7 +173,6 @@ void MainWindow::on_user_clicked()
 void MainWindow::on_mode_clicked()
 {
     qDebug() << "mode 按钮点击了";
-
 }
 
 void MainWindow::on_generate_code_clicked()
@@ -427,12 +427,28 @@ void MainWindow::on_start_new_clicked()
 
 void MainWindow::on_previous_clicked()
 {
+    // 使用堆栈分配而不是成员变量
+    ResourcePage *resourcePage = new ResourcePage();
+    resourcePage->setAttribute(Qt::WA_DeleteOnClose); // 确保关闭时自动删除
 
+    connect(resourcePage, &ResourcePage::returnToMain, this, [this, resourcePage]() {
+        this->show();
+        resourcePage->close(); // 确保关闭资源页面
+    });
+
+    //this->hide();
+    resourcePage->show();
+}
+
+void MainWindow::onReturnFromResource()
+{
+    resourcePage->hide();
+    this->show();
 }
 
 void MainWindow::on_toolButton_clicked()
 {
-
+    return;
 }
 
 void MainWindow::on_turnback_clicked()
@@ -861,6 +877,7 @@ void MainWindow::applyTheme(const QString& theme)
 MainWindow::~MainWindow()
 {
     delete ui;
+    //delete resourcePage;
 }
 // 静态成员定义
 MainWindow* MainWindow::s_instance = nullptr;
