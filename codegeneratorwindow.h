@@ -1,4 +1,3 @@
-
 #ifndef CODEGENERATORWINDOW_H
 #define CODEGENERATORWINDOW_H
 
@@ -68,6 +67,7 @@ public:
     explicit CodeGeneratorWindow(QWidget *parent = nullptr);
     QJsonArray getNetworkAsJson() const;
     ~CodeGeneratorWindow();
+    void onSceneSelectionChanged();
 
 public slots:
     void on_return_mainwindow_clicked();//
