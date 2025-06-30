@@ -20,6 +20,23 @@ Matrial::Matrial(QWidget *parent)
     resize(1200, 900);
 
     backToMainButton = new QPushButton("返回主界面", this);
+    backToMainButton->setStyleSheet(
+        "QPushButton {"
+        "   background-color: #2196F3;"
+        "   color: white;"
+        "   border: none;"
+        "   padding: 10px 20px;"
+        "   font-size: 14px;"
+        "   border-radius: 5px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: #1976D2;"
+        "}"
+        "QPushButton:disabled {"
+        "   background-color: #cccccc;"
+        "   color: #666666;"
+        "}"
+        );
     connect(backToMainButton, &QPushButton::clicked, this, &Matrial::on_backToMain_clicked);
     buttonLayout->addWidget(backToMainButton);
 }
