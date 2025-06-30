@@ -202,6 +202,7 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
 }
 
 
+
 void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
     if (!isInCustomMode){
         QString layerType = item->text();
@@ -239,7 +240,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
             layer->kernelSize = 5;
             layer->neurons = 1;
         }
-        else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+        else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
             params["poolingSize"] = "4";
             layer->poolingSize = 4;
             layer->neurons = 1;
@@ -247,6 +248,7 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
             params["units"] = "128";
             layer->neurons = 1;
+            layer->units = 128;
         }
         else if (layerType == "Dropout") {
             params["dropoutRate"] = "0.5";
@@ -338,10 +340,10 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
         selectedLayer->filters = params["filters"].toInt();
         selectedLayer->kernelSize = params["kernel_size"].toInt();
     }
-    else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+    else if (layerType == "MaxPooling" || layerType == "AveragePooling") {
        updatedLayer->poolingSize = params["pooling_size"].toInt();
     }
-    else if (layerType == "LSTM" || layerType == "RNN") {
+    else if (layerType == "LSTM" || layerType == "RNN"|| layerType == "GRU") {
         selectedLayer->units = params["units"].toInt();
     }
     else if (layerType == "Dropout") {
@@ -356,6 +358,7 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
     m_networkVisualizer->refreshLayerItem(updatedLayer.get());
     //m_networkVisualizer->refreshLayerItem(selectedLayer);
 }
+
 
 QColor CodeGeneratorWindow::colorForLayerType(const QString& layerType) {
     if (layerType == "Input") return Qt::cyan;
