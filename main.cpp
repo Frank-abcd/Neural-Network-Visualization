@@ -2,13 +2,15 @@
 #include "backend.h"
 #include <QApplication>
 #include <QLocale>
+#include <QMetaType>
 #include <QTranslator>
 #include "networkvisualizer.h"
-#include "layerblockitem.h
+#include "layerblockitem.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    qRegisterMetaType<NeuralLayer>("NeuralLayer");
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString &locale : uiLanguages) {
