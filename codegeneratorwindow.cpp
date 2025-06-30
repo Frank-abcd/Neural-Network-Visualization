@@ -235,6 +235,7 @@ void CodeGeneratorWindow::on_generateCodeButton_clicked() {
     m_codeDisplay->setPlainText(code);
 }
 
+
 void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
     if (!isInCustomMode){
         QString layerType = item->text();
@@ -248,11 +249,6 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         MyGraphicsRectItem* layerItem = new MyGraphicsRectItem();
         layerItem->setRect(0, 0, 100, 50);
         layerItem->setBrush(color);
-
-        // 新增：将图形项指针存储在层对象中
-        layer.graphicsItem = layerItem;
-        layer.activationFunction = "relu";
-
         layerItem->setData(0, QVariant::fromValue(layer));
         m_builderScene->addItem(layerItem);
 
@@ -270,16 +266,22 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
         }
         else if (layerType == "Convolutional") {
             params["filters"] = "32";
-            params["kernel_size"] = "5";
+            params["kernelSize"] = "5";
+            layer.filters = 32;
+            layer.kernelSize = 5;
         }
         else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-            params["pooling_size"] = "5";
+            params["poolingSize"] = "5";
+            layer.poolingSize = 5;
+            layer.neurons = 1;
         }
         else if (layerType == "LSTM" || layerType == "RNN" || layerType == "GRU") {
             params["units"] = "128";
         }
         else if (layerType == "Dropout") {
-            params["dropout_rate"] = "0.5";
+            params["dropoutRate"] = "0.5";
+            layer.dropoutRate = 0.5f;
+            layer.neurons =1;
         }
         else if (layerType == "Input") {
             params["neurons"] = "15";
@@ -310,6 +312,8 @@ void CodeGeneratorWindow::on_layersList_itemClicked(QListWidgetItem* item) {
 
         layerItem->setZValue(1);
 
+        // Add connection points to the new layer
+        addConnectionPoints(layerItem);
     }
     else{
         m_propertyPanel->clearParameters();
@@ -334,80 +338,45 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
     // 更新选中的层的参数
     QList<QGraphicsItem*> selectedItems = m_builderScene->selectedItems();
     if (!selectedItems.isEmpty()) {
-        // QGraphicsRectItem* selectedItem = qgraphicsitem_cast<QGraphicsRectItem*>(selectedItems[0]);
-        // if (selectedItem) {
-        //     // 使用 QVariant::value() 安全地获取 NeuralLayer 对象
-        //     QVariant data = selectedItem->data(0);
-        //     NeuralLayer selectedLayer = data.value<NeuralLayer>();
-        //     QString layerType = params["LayerType"];
+        QGraphicsRectItem* selectedItem = qgraphicsitem_cast<QGraphicsRectItem*>(selectedItems[0]);
+        if (selectedItem) {
+            // 使用 QVariant::value() 安全地获取 NeuralLayer 对象
+            QVariant data = selectedItem->data(0);
+            NeuralLayer selectedLayer = data.value<NeuralLayer>();
+            QString layerType = params["LayerType"];
 
-        //     if (layerType == "Dense") {
-        //         selectedLayer.neurons = params["neurons"].toInt();
-        //         selectedLayer.activationFunction = params["activation"];
-        //     }
-        //     else if (layerType == "Convolutional") {
-        //         selectedLayer.filters = params["filters"].toInt();
-        //         selectedLayer.kernelSize = params["kernel_size"].toInt();
-        //     }
-        //     else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-        //         selectedLayer.poolingSize = params["pooling_size"].toInt();
-        //     }
-        //     else if (layerType == "LSTM" || layerType == "RNN") {
-        //         selectedLayer.units = params["units"].toInt();
-        //     }
-        //     else if (layerType == "Dropout") {
-        //         selectedLayer.dropoutRate = params["dropout_rate"].toFloat();
-        //     }
-        //      else if (layerType == "Hidden") {
+            if (layerType == "Dense") {
+                selectedLayer.neurons = params["neurons"].toInt();
+                selectedLayer.activationFunction = params["activation"];
+            }
+            else if (layerType == "Convolutional") {
+                selectedLayer.filters = params["filters"].toInt();
+                selectedLayer.kernelSize = params["kernel_size"].toInt();
+            }
+            else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
+                selectedLayer.poolingSize = params["pooling_size"].toInt();
+            }
+            else if (layerType == "LSTM" || layerType == "RNN") {
+                selectedLayer.units = params["units"].toInt();
+            }
+            else if (layerType == "Dropout") {
+                selectedLayer.dropoutRate = params["dropout_rate"].toFloat();
+            }
+            else if (layerType == "Hidden") {
                 selectedLayer.neurons = params["neurons"].toInt();
                 selectedLayer.activationFunction = params["activation"];
             }
             else if (layerType == "Output") {
                 selectedLayer.neurons = params["neurons"].toInt();
             }
+            // 更新其他层类型参数...
 
-        //     // 更新 m_layers 中对应层
-        //     for (int i = 0; i < m_layers.size(); ++i) {
-        //         if (m_layers[i].layerType == layerType) {
-        //             m_layers[i] = selectedLayer;
-        //             break;
-        //         }
-        //     }
-        // }
-        QGraphicsItem* selectedItem = selectedItems.first();
-        QVariant data = selectedItem->data(0);
-        if (!data.isValid()) return;
-
-        NeuralLayer layer = data.value<NeuralLayer>();
-        QString layerType = layer.layerType;  // 从层实例获取类型
-
-        // 根据层类型更新参数
-        if (layerType == "Dense" || layerType == "Hidden" || layerType == "Input" || layerType == "Output") {
-            layer.neurons = params["neurons"].toInt();
-            layer.activationFunction = params["activation"];
-        } else if (layerType == "Convolutional") {
-            layer.filters = params["filters"].toInt();
-            layer.kernelSize = params["kernel_size"].toInt();
-        }
-        else if (layerType == "MaxPooling" || layerType == "AvgPooling") {
-            layer.poolingSize = params["pooling_size"].toInt();
-        }
-        else if (layerType == "LSTM" || layerType == "RNN") {
-            layer.units = params["units"].toInt();
-        }
-        else if (layerType == "Dropout") {
-            layer.dropoutRate = params["dropout_rate"].toFloat();
-        }
-
-
-        // 更新图形项中的数据
-        selectedItem->setData(0, QVariant::fromValue(layer));
-
-        // 更新层列表中的数据（可选）
-        for (int i = 0; i < m_layers.size(); ++i) {
-            if (m_layers[i].layerType == layerType) {
-                m_layers[i] = layer;
-                break;
+            // 更新 m_layers 中对应层
+            for (int i = 0; i < m_layers.size(); ++i) {
+                if (m_layers[i].layerType == layerType) {
+                    m_layers[i] = selectedLayer;
+                    break;
+                }
             }
         }
     }
@@ -423,6 +392,7 @@ void CodeGeneratorWindow::on_propertiesPanel_parametersUpdated(const QMap<QStrin
         QTimer::singleShot(3000, msgBox, &QMessageBox::deleteLater);
     }
 }
+
 
 QColor CodeGeneratorWindow::colorForLayerType(const QString& layerType) {
     if (layerType == "Input") return Qt::cyan;
