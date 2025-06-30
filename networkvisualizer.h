@@ -12,24 +12,17 @@
 #include <QPen>
 #include <QBrush>
 
-/*
-struct NeuralLayer {
-    QString layerType; // 新增：类型（如 Dense）
-    int inputSize;     // 输入维度
-    int neurons;       // 神经元数量
-    QString activationFunction; // 激活函数
-};*/
+
 
 class NetworkVisualizer : public QGraphicsView {
     Q_OBJECT
 public:
     NetworkVisualizer(QWidget* parent = nullptr);
     void createNetwork(const QList<NeuralLayer>& layers);
-    void createNetwork(const QJsonArray& layersJson);
-    void setLayers(const QList<NeuralLayer>& layers);
+    //void createNetwork(const QJsonArray& layersJson);
     void createblockNetwork(const QList<NeuralLayer>& layers);
     void applyColorTheme(const QString& themeName);
-    QGraphicsItemGroup* createDetailedLayer(const QString& layerName, const QString& activation, int yPos);
+    QGraphicsItemGroup* createDetailedLayer(const NeuralLayer& layer , int yPos);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
