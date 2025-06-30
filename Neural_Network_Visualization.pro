@@ -60,3 +60,6 @@ CONFIG += lrelease
     #resource.qrc
 
 DISTFILES +=
+
+RESOURCES += \
+    resource.qrc
