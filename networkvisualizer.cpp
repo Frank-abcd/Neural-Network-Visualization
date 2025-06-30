@@ -22,12 +22,7 @@ void NetworkVisualizer::updateConnections() {
     qDebug() << "Updating connections";
     for (const ConnectionLine& conn : m_connections) {
         if (!conn.fromGroup || !conn.toGroup || !conn.line) continue;
-/*
-        QPointF p1 = conn.fromGroup->sceneBoundingRect().center();
-        p1.setY(conn.fromGroup->sceneBoundingRect().bottom());
 
-        QPointF p2 = conn.toGroup->sceneBoundingRect().center();
-        p2.setY(conn.toGroup->sceneBoundingRect().top());*/
         QPointF p1 = conn.fromGroup->mapToScene(
             conn.fromGroup->boundingRect().center().x(),
             conn.fromGroup->boundingRect().bottom()
@@ -39,6 +34,15 @@ void NetworkVisualizer::updateConnections() {
 
         conn.line->setLine(QLineF(p1, p2));
     }
+}
+void NetworkVisualizer::createConnection(MovableLayerGroup* from, MovableLayerGroup* to) {
+    QPointF p1 = from->sceneBoundingRect().center();
+    p1.setY(from->sceneBoundingRect().bottom());
+    QPointF p2 = to->sceneBoundingRect().center();
+    p2.setY(to->sceneBoundingRect().top());
+
+    QGraphicsLineItem* line = m_scene->addLine(QLineF(p1, p2), QPen(Qt::black));
+    m_connections.append({line, from, to});
 }
 
 
@@ -105,6 +109,25 @@ MovableLayerGroup* NetworkVisualizer::createDetailedLayer(
 
         // 标签文本
         QString dropoutText = QString("rate: %1").arg(layer.dropoutRate, 0, 'f', 4);//（4位小数）
+        QGraphicsTextItem* actLabel = new QGraphicsTextItem(dropoutText, act);
+        actLabel->setPos(10, 5);
+
+        // 动态计算文本宽度调整矩形框大小
+        QFontMetrics metrics(actLabel->font());
+        int textWidth = metrics.horizontalAdvance(dropoutText);  // 获取文本像素宽度
+        act->setRect(0, 0, textWidth + 20, 26);
+
+    }
+
+    if (layerName== "MaxPooling" || layerName == "AveragePooling")  {
+        //pooling层框
+        QGraphicsRectItem* act = new QGraphicsRectItem(0, 0, 100, 26);
+        act->setBrush(theme.activationBoxFill);
+        act->setPos(30, 90);
+        group->addToGroup(act);
+
+        // 标签文本
+        QString dropoutText = QString("poolingSize: %1").arg(layer.poolingSize);
         QGraphicsTextItem* actLabel = new QGraphicsTextItem(dropoutText, act);
         actLabel->setPos(10, 5);
 
@@ -237,13 +260,9 @@ void NetworkVisualizer::createblockNetwork(const QList<NeuralLayer>& layers) {
     for (int i = 0; i < layers.size(); ++i) {
         const NeuralLayer& layer = layers[i];
         MovableLayerGroup* group = createDetailedLayer(layer, 20 + i * layerSpacing);
+        group->setData(0, QVariant::fromValue(const_cast<NeuralLayer*>(&layer)));  // 需要存储指针关联
+
         layerGroups.append(group);
-        /*
-        QGraphicsItemGroup* group = createDetailedLayer(
-            layer,
-            20 + i * layerSpacing
-            );
-        layerGroups.append(group);*/
         m_layerGroups.append(group);
     }
 
@@ -317,6 +336,45 @@ void NetworkVisualizer::applyColorTheme(const QString& themeName) {
         }
     }
 
+void NetworkVisualizer::refreshLayerItem(NeuralLayer* layer) {
+    for (int i = 0; i < m_layerGroups.size(); ++i) {
+        auto group = m_layerGroups[i];
+        if (group->data(0).value<NeuralLayer*>() == layer) {
+            QPointF oldPos = group->pos();
+
+            // 删除旧连接线
+            for (auto it = m_connections.begin(); it != m_connections.end(); ) {
+                if (it->fromGroup == group || it->toGroup == group) {
+                    m_scene->removeItem(it->line);
+                    delete it->line;
+                    it = m_connections.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            //重建图层
+            m_scene->removeItem(group);
+            delete group;
+
+            auto newGroup = createDetailedLayer(*layer, oldPos.y());
+            newGroup->setPos(oldPos);
+            newGroup->setData(0, QVariant::fromValue(layer));
+            m_layerGroups[i] = newGroup;
+
+            //重建连接线
+            if (i > 0) {
+                createConnection(m_layerGroups[i-1], newGroup);
+            }
+            if (i < m_layerGroups.size()-1) {
+                createConnection(newGroup, m_layerGroups[i+1]);
+            }
+
+            update();
+            break;
+        }
+    }
+}
 
 
 void NetworkVisualizer::dragMoveEvent(QDragMoveEvent* event) {
