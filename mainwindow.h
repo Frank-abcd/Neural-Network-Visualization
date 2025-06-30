@@ -39,13 +39,18 @@ public:
     void loadNetworkFromJson(const QJsonArray& layers);
     void showWarningMessage(const QString& text);
     void visualizeNetwork(const QJsonArray& layers);
-    void onHistoryRecordClicked(const QString& recordKey);
+    void onHistoryRecordClicked(int index);
     bool currentNetworkSaved;
     QJsonArray loadHistoryByKey(const QString& key);
     void showNetworkVisualization(const QJsonArray& layers);
     void clearPreviewArea();
     void applyTheme(const QString& theme);
     bool original;
+    QVector<QJsonArray> historyCache;
+    QVector<bool> historySaved;
+    QVector<QString> historyLabel;
+    bool imageGenerate;
+    int position;
 
 private:
     Ui::MainWindow *ui;
@@ -61,19 +66,15 @@ private:
     NetworkVisualizer* visualizer = nullptr;
 
 private slots:
-    void on_user_clicked();
-    void on_mode_clicked();
-    void on_generate_code_clicked();
-    void on_generate_image_clicked();
-
-    void on_toolButton_clicked();
-
-    void on_history_clicked();
-    void on_start_new_clicked();
-    void on_previous_clicked();
-    void on_turnback_clicked();
-    void on_save_clicked();
-
+    void on_userGuide_clicked();
+    void on_generateCode_clicked();
+    void on_generateImage_clicked();
+    void on_checkHistory_clicked();
+    void on_startNew_clicked();
+    void on_lastStep_clicked();
+    void on_nextStep_clicked();
+    void on_saveCurrent_clicked();
+    void on_showResources_clicked();
     void onReturnFromResource();
 
 };

@@ -25,14 +25,21 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="imagecolor">
+      <widget class="QPushButton" name="userGuide">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="user">
+      <widget class="QPushButton" name="pageColor">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="neuralTheme">
        <property name="minimumSize">
         <size>
          <width>119</width>
@@ -48,7 +55,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="mode">
+      <widget class="QPushButton" name="selectMode">
        <property name="minimumSize">
         <size>
          <width>119</width>
@@ -61,61 +68,56 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="generate_code">
-       <property name="minimumSize">
-        <size>
-         <width>119</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;切换界面&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 6pt &quot;Microsoft YaHei UI&quot;;</string>
-       </property>
+      <widget class="QPushButton" name="generateCode">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="generate_image">
+      <widget class="QPushButton" name="generateImage">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="history">
+      <widget class="QPushButton" name="checkHistory">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="start_new">
+      <widget class="QPushButton" name="startNew">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="previous">
+      <widget class="QPushButton" name="lastStep">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="turnback">
+      <widget class="QPushButton" name="nextStep">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="save">
+      <widget class="QPushButton" name="saveCurrent">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="showResources">
        <property name="text">
         <string/>
        </property>
